@@ -66,6 +66,36 @@ Preferred communication style: Simple, everyday language.
 3. **Access Logging**: All emergency accesses are logged with timestamps and IP addresses
 4. **Mobile-Friendly**: Responsive design optimized for demonstration on various devices
 
+### Patient Portal Components (December 2024)
+
+**PatientProfile.vue**: Displays patient information including:
+- Profile card with name, age, contact info, and NFT ID
+- Blood type display (critical emergency info)
+- Allergies list with visual badges
+- Current medications list
+- Emergency contacts with phone links
+- QR code generation for emergency access (using qrcode.vue)
+
+**EmergencyToggle.vue**: Emergency mode activation system:
+- Big red "Activate Emergency Mode" button
+- Confirmation modal with optional access code
+- 24-hour countdown timer when active
+- Auto-generated or custom emergency access code
+- Persistent state across page reloads (localStorage)
+- Warning banner when emergency mode is active
+
+**MedicalRecordsList.vue**: Medical records management:
+- Search functionality across all records
+- Filter by record type (Consultation, Laboratory, Prescription, Vaccination, Procedure)
+- Expandable record cards with blockchain verification status
+- Hospital visit history timeline
+- Color-coded record types with icons
+
+**Pinia Patient Store**: State management for patient data:
+- Emergency mode state with expiry tracking
+- Patient profile caching
+- Emergency code generation and persistence
+
 ### Running the Project
 
 The workflow named 'Start application' runs `npm run dev` which starts:
@@ -78,9 +108,14 @@ The workflow named 'Start application' runs `npm run dev` which starts:
 client/
   src/
     views/           # Page components (Login, Register, Dashboard, Emergency)
-    components/      # Reusable UI components
+    components/
+      patient/       # Patient portal components
+        PatientProfile.vue      # Patient info + QR code
+        EmergencyToggle.vue     # Emergency mode control
+        MedicalRecordsList.vue  # Medical records with filtering
     router/          # Vue Router configuration
-    stores/          # Pinia stores
+    stores/
+      patientStore.ts  # Pinia store for patient state
     lib/             # Utilities and API client
     styles/          # Global CSS and theme
 server/
@@ -89,4 +124,5 @@ server/
   index.ts           # Server entry point
 shared/
   schema.ts          # Data types and validation schemas
+  mockData.ts        # Mock Philippine healthcare data
 ```
