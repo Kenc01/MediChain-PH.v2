@@ -1,0 +1,568 @@
+Perfect! Vue.js is an excellent choice for your thesis. Here are the **exact prompts** to build your Health NFT thesis project on Replit:
+
+## **🚀 INITIAL REPLIT SETUP:**
+
+### **Prompt 1: Create Project**
+```
+Create a new Replit project with Vue.js 3 + TypeScript + Vite template.
+Project name: "MediChain-Thesis"
+Add these dependencies: 
+- vue-router@4
+- pinia (for state management)
+- qrcode.vue (for QR codes)
+- axios (for API calls)
+- @vueuse/core (for utilities)
+- tailwindcss (for styling)
+- daisyui (for UI components)
+```
+
+### **Prompt 2: Folder Structure**
+```
+Create this folder structure:
+/src
+  /components
+    /patient
+      PatientProfile.vue
+      MedicalRecords.vue
+      EmergencyToggle.vue
+    /hospital
+      HospitalLogin.vue
+      PatientSearch.vue
+      RecordViewer.vue
+    /common
+      QRCodeDisplay.vue
+      EmergencyBanner.vue
+      NavBar.vue
+  /views
+    HomeView.vue
+    PatientPortal.vue
+    HospitalPortal.vue
+    EmergencyView.vue
+  /stores
+    patientStore.ts
+    hospitalStore.ts
+    blockchainStore.ts
+  /types
+    patient.ts
+    record.ts
+  /utils
+    mockData.ts
+    blockchainMock.ts
+    encryption.ts
+  /assets
+    (for images, styles)
+```
+
+## **🎨 DESIGN SYSTEM SETUP:**
+
+### **Prompt 3: Tailwind Configuration**
+```
+Create tailwind.config.js with healthcare theme:
+Primary: #0EA5E9 (Medical Blue)
+Secondary: #10B981 (Health Green)
+Emergency: #EF4444 (Red)
+Background: #F8FAFC
+
+Add custom classes for:
+- .btn-primary (blue for normal actions)
+- .btn-emergency (red with pulse animation)
+- .medical-card (white with blue border)
+- .record-item (with hospital logo placeholder)
+```
+
+## **📱 CORE COMPONENTS PROMPTS:**
+
+### **Prompt 4: Patient Profile Component**
+```
+Create PatientProfile.vue with:
+1. Patient photo placeholder
+2. Name, age, blood type display
+3. Large QR code in center (using qrcode.vue)
+4. Emergency toggle button (red, prominent)
+5. Basic patient info: blood type, allergies, emergency contact
+6. Responsive design for mobile
+
+Use mock data from patientStore.
+QR value should be: "medichain://patient/{patientId}"
+```
+
+### **Prompt 5: Medical Records Component**
+```
+Create MedicalRecords.vue showing:
+1. List of medical records with:
+   - Hospital icon/name
+   - Record type (Vaccine, Check-up, Lab, etc.)
+   - Date
+   - Status (Verified/Pending)
+2. Filter by record type
+3. Add mock record button (for demo purposes)
+4. Each record expandable to show details
+
+Use mock data with 5-7 sample records from different hospitals.
+```
+
+### **Prompt 6: Emergency Toggle Component**
+```
+Create EmergencyToggle.vue with:
+1. Big red button saying "EMERGENCY MODE"
+2. When clicked, show confirmation modal
+3. When active: 
+   - Button pulses red
+   - Banner shows "EMERGENCY ACCESS ACTIVE"
+   - QR code changes to show emergency data
+4. Timer showing 24-hour countdown
+5. Option to add emergency code/password
+
+Include warning messages about data sharing.
+```
+
+### **Prompt 7: Hospital Interface Components**
+```
+Create 3 components for hospital side:
+
+1. HospitalLogin.vue:
+   - Simple login form (username: "hospital", password: "test123")
+   - Hospital logo placeholder
+   - Remember that this is for thesis demo only
+
+2. PatientSearch.vue:
+   - Search bar for patient name
+   - QR code scanner simulation (button that "scans")
+   - Recent patients list from mock data
+
+3. RecordViewer.vue:
+   - Patient info section
+   - Medical records timeline
+   - "Add New Record" form with:
+     * Record type dropdown
+     * Date picker
+     * Notes textarea
+     * Submit button
+```
+
+## **📊 STATE MANAGEMENT PROMPTS:**
+
+### **Prompt 8: Pinia Stores**
+```
+Create three Pinia stores:
+
+1. patientStore.ts:
+   - State: currentPatient (mock data), medicalRecords[], isEmergency
+   - Actions: toggleEmergency(), addRecord(), updateProfile()
+   - Getters: criticalInfo(), recentRecords()
+
+2. hospitalStore.ts:
+   - State: currentHospital, searchedPatient, accessLogs[]
+   - Actions: searchPatient(), grantAccess(), addHospitalRecord()
+
+3. blockchainStore.ts:
+   - State: mockBlocks[], transactions[]
+   - Actions: addBlock(), getPatientHistory(), verifyRecord()
+   - Simulate blockchain with simple array operations
+```
+
+## **🏠 PAGE/VIEW PROMPTS:**
+
+### **Prompt 9: Home View**
+```
+Create HomeView.vue with:
+1. Hero section: "Health NFTs: Own Your Medical Data"
+2. Three value propositions:
+   - "Emergency Access" with QR code icon
+   - "Hospital Connections" with building icon
+   - "Data Control" with lock icon
+3. Two big buttons:
+   - "Patient Portal" (goes to /patient)
+   - "Hospital Portal" (goes to /hospital)
+4. Simple explanation: "Thesis Project - Not Real Medical System"
+```
+
+### **Prompt 10: Patient Portal View**
+```
+Create PatientPortal.vue with:
+Tab navigation for:
+1. Profile (PatientProfile component)
+2. Records (MedicalRecords component)  
+3. Access Control (simple list of who has access)
+4. Settings (emergency settings, privacy)
+
+Use Vue Router with tab switching.
+Mobile-friendly bottom navigation.
+```
+
+### **Prompt 11: Hospital Portal View**
+```
+Create HospitalPortal.vue with:
+If not logged in: Show HospitalLogin
+If logged in: Show tabs:
+1. Search Patient (PatientSearch component)
+2. View Records (RecordViewer component)
+3. Access Logs (table of who accessed what)
+
+Simulate hospital workflow: Login → Search → View/Add Records
+```
+
+### **Prompt 12: Emergency View**
+```
+Create EmergencyView.vue for demonstration:
+1. Big red header: "EMERGENCY MEDICAL ACCESS"
+2. QR scanner simulation (button that "scans" demo QR)
+3. If access granted, show:
+   - Critical patient info (red background)
+   - Recent medical records
+   - Emergency contacts
+4. Footer: "This access will expire in 24 hours"
+5. Access log showing in blockchain simulation
+```
+
+## **🔧 UTILITY/HELPER PROMPTS:**
+
+### **Prompt 13: Mock Data**
+```
+Create mockData.ts with:
+1. Sample patient data (Filipino names, common diseases)
+2. Sample hospitals (St. Luke's, Makati Med, PGH, etc.)
+3. Sample medical records (vaccinations, check-ups, lab results)
+4. Sample blockchain transactions
+5. Sample access logs
+
+Make data realistic but clearly mock/demo data.
+```
+
+### **Prompt 14: Blockchain Simulation**
+```
+Create blockchainMock.ts that simulates blockchain:
+1. Class MockBlockchain with:
+   - blocks array
+   - addBlock(patientId, data) - adds to chain
+   - getBlocks(patientId) - returns patient's blocks
+   - verifyBlock(blockId) - returns true/false
+2. Make it look like real blockchain with:
+   - Previous hash references
+   - Timestamps
+   - "Mining" simulation
+3. Simple enough for thesis demonstration
+```
+
+## **🎯 ROUTER SETUP PROMPT:**
+
+### **Prompt 15: Vue Router Configuration**
+```
+Create router with these routes:
+1. / - HomeView
+2. /patient - PatientPortal (with nested routes for tabs)
+3. /hospital - HospitalPortal
+4. /emergency - EmergencyView
+5. /demo - Demonstration page showing all features
+
+Add navigation guard for hospital portal requiring login.
+Make all routes work with browser back/forward.
+```
+
+## **📱 MOBILE RESPONSIVENESS PROMPT:**
+
+### **Prompt 16: Responsive Design**
+```
+Make everything mobile-first:
+1. Use Tailwind responsive classes (sm:, md:, lg:)
+2. Bottom navigation on mobile for patient portal
+3. Hamburger menu for hospital portal
+4. Touch-friendly button sizes
+5. QR code scales appropriately
+6. Emergency button always visible on mobile
+```
+
+## **🎬 DEMO FEATURES PROMPT:**
+
+### **Prompt 17: Demo Mode**
+```
+Add a DemoButton.vue component that:
+1. Toggles between "Thesis Demo Mode" ON/OFF
+2. When ON: Shows explanatory overlays on each feature
+3. When ON: Enables quick scenario buttons:
+   - "Simulate Emergency"
+   - "Add Test Record"
+   - "Show Blockchain Verification"
+   - "Demonstrate Access Control"
+4. Helps during thesis defense presentation
+```
+
+## **🔐 AUTHENTICATION PROMPT:**
+
+### **Prompt 18: Simple Auth System**
+```
+Create auth system (simple for thesis):
+1. Patient: No login needed for demo (uses mock patient)
+2. Hospital: Simple username/password (hardcoded for demo)
+3. Emergency: Special code "EMERGENCY123" for demo
+4. Store auth state in localStorage for persistence during demo
+
+Remember: This is for thesis, not production security.
+```
+
+## **📊 DATA VISUALIZATION PROMPT:**
+
+### **Prompt 19: Blockchain Visualization**
+```
+Create BlockchainVisualizer.vue showing:
+1. Chain of blocks visualization
+2. Each block shows: Patient ID, Record Type, Hash, Timestamp
+3. Animated "mining" when adding new record
+4. Highlight verified blocks in green
+5. Simple enough to understand for thesis defense
+```
+
+## **🚨 EMERGENCY SCENARIO PROMPT:**
+
+### **Prompt 20: Emergency Demo**
+```
+Create EmergencyDemo.vue for thesis presentation:
+1. Scenario: "Patient unconscious in emergency room"
+2. Step 1: Paramedic scans QR code
+3. Step 2: System shows critical info
+4. Step 3: Hospital accesses full history
+5. Step 4: Blockchain logs the access
+6. Step 5: Patient later reviews who accessed data
+
+Make this a guided walkthrough for thesis defense.
+```
+
+## **📝 THESIS INTEGRATION PROMPTS:**
+
+### **Prompt 21: Documentation Components**
+```
+Create components for thesis documentation:
+1. ArchitectureDiagram.vue - Shows system architecture
+2. UserFlowChart.vue - Shows patient/hospital flows
+3. ComparisonTable.vue - Compares with existing systems
+4. LimitationsPanel.vue - Shows what's not implemented
+
+These help during thesis presentation.
+```
+
+### **Prompt 22: Thesis Mode Toggle**
+```
+Create ThesisMode.vue that:
+1. Adds academic commentary to UI
+2. Shows design decisions when hovering
+3. Explains technical choices
+4. Highlights research contributions
+5. Can be turned off for clean demo
+```
+
+## **⚡ PERFORMANCE/DEPLOYMENT PROMPTS:**
+
+### **Prompt 23: Replit Deployment**
+```
+Configure for Replit deployment:
+1. .replit file with run command: "npm run dev"
+2. replit.nix for dependencies
+3. Set up preview in Replit browser
+4. Configure for mobile testing in Replit
+```
+
+### **Prompt 24: Export for Thesis Submission**
+```
+Create export functionality:
+1. Button to generate demo video script
+2. Button to export all screenshots
+3. Button to export mock data used
+4. Button to generate architecture diagram
+5. Button to create presentation slides outline
+```
+
+## **📚 STEP-BY-STEP BUILD ORDER:**
+
+### **Week 1 Prompts (Start Here):**
+```
+1. Create Project (Prompt 1)
+2. Folder Structure (Prompt 2)
+3. Design System (Prompt 3)
+4. Mock Data (Prompt 13)
+5. Pinia Stores (Prompt 8)
+```
+
+### **Week 2 Prompts:**
+```
+6. Patient Components (Prompts 4, 5, 6)
+7. Router Setup (Prompt 15)
+8. Home View (Prompt 9)
+9. Patient Portal (Prompt 10)
+```
+
+### **Week 3 Prompts:**
+```
+10. Hospital Components (Prompt 7)
+11. Hospital Portal (Prompt 11)
+12. Emergency View (Prompt 12)
+13. Blockchain Simulation (Prompt 14)
+```
+
+### **Week 4 Prompts:**
+```
+14. Mobile Responsiveness (Prompt 16)
+15. Demo Features (Prompt 17)
+16. Emergency Demo (Prompt 20)
+17. Thesis Integration (Prompts 21, 22)
+```
+
+## **🎯 QUICK START COMMAND SEQUENCE:**
+
+Copy and paste these into Replit in order:
+
+**First, in Replit Shell:**
+```bash
+# Create Vue 3 + TypeScript + Vite project
+npm create vue@latest . -- --typescript --router --pinia
+
+# Install dependencies
+npm install qrcode.vue axios @vueuse/core
+npm install -D tailwindcss postcss autoprefixer daisyui
+npx tailwindcss init -p
+
+# Configure Tailwind
+echo "module.exports = {
+  content: ['./index.html', './src/**/*.{vue,js,ts,jsx,tsx}'],
+  theme: {
+    extend: {
+      colors: {
+        'medical-blue': '#0EA5E9',
+        'health-green': '#10B981',
+        'emergency-red': '#EF4444',
+      }
+    }
+  },
+  plugins: [require('daisyui')],
+}" > tailwind.config.js
+```
+
+**Then in Replit, create this file structure using the "+" button:**
+
+Start with `src/views/HomeView.vue`:
+```vue
+<template>
+  <div class="min-h-screen bg-gradient-to-b from-blue-50 to-white">
+    <div class="container mx-auto px-4 py-16">
+      <!-- Hero Section -->
+      <div class="text-center mb-16">
+        <h1 class="text-5xl font-bold text-medical-blue mb-4">
+          🏥 Health NFT Thesis Project
+        </h1>
+        <p class="text-xl text-gray-600 mb-8">
+          A blockchain-based patient-owned medical record system for the Philippines
+        </p>
+        <div class="flex justify-center space-x-4">
+          <router-link to="/patient" class="btn btn-lg btn-primary">
+            👤 Patient Portal
+          </router-link>
+          <router-link to="/hospital" class="btn btn-lg btn-secondary">
+            🏥 Hospital Portal
+          </router-link>
+        </div>
+      </div>
+
+      <!-- Value Propositions -->
+      <div class="grid md:grid-cols-3 gap-8 mb-16">
+        <div class="card bg-base-100 shadow-xl">
+          <div class="card-body items-center text-center">
+            <div class="text-4xl mb-4">📱</div>
+            <h3 class="card-title">Patient-Owned Data</h3>
+            <p>You control your medical records with Health NFTs</p>
+          </div>
+        </div>
+        <div class="card bg-base-100 shadow-xl">
+          <div class="card-body items-center text-center">
+            <div class="text-4xl mb-4">🚨</div>
+            <h3 class="card-title">Emergency Access</h3>
+            <p>QR code provides critical info in emergencies</p>
+          </div>
+        </div>
+        <div class="card bg-base-100 shadow-xl">
+          <div class="card-body items-center text-center">
+            <div class="text-4xl mb-4">🔗</div>
+            <h3 class="card-title">Blockchain Secure</h3>
+            <p>Immutable audit trail of all access</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Thesis Notice -->
+      <div class="alert alert-info">
+        <div>
+          <span>🎓 <strong>Thesis Project Only</strong> - This is a demonstration for academic purposes. Not for real medical use.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script setup lang="ts">
+// This is your starting point
+</script>
+```
+
+## **✅ COMPLETION CHECKLIST:**
+
+After following prompts, you should have:
+
+**Core Features (Must Have):**
+1. ✅ Patient profile with QR code
+2. ✅ Medical records display
+3. ✅ Emergency mode toggle
+4. ✅ Hospital interface mockup
+5. ✅ Blockchain simulation
+6. ✅ Mobile responsive design
+
+**Thesis Features (Nice to Have):**
+1. ✅ Demo mode with explanations
+2. ✅ Architecture diagrams
+3. ✅ User flow visualizations
+4. ✅ Comparison tables
+5. ✅ Export functionality for thesis
+
+**Ready for Defense:**
+1. ✅ Working prototype on Replit
+2. ✅ Presentation-ready demo flows
+3. ✅ Clear separation of mock/real
+4. ✅ Academic commentary mode
+5. ✅ Easy to navigate for panel members
+
+## **🎓 THESIS DEFENSE PREP:**
+
+**Create this additional component for defense:**
+
+```vue
+<template>
+  <div class="thesis-helper fixed bottom-4 right-4 z-50">
+    <button @click="showHelp = !showHelp" class="btn btn-accent">
+      🎓 Thesis Helper
+    </button>
+    
+    <div v-if="showHelp" class="card bg-base-100 shadow-lg mt-2 w-80">
+      <div class="card-body">
+        <h3 class="card-title">Thesis Defense Points</h3>
+        
+        <div class="space-y-2">
+          <button @click="showPoint('innovation')" class="btn btn-sm btn-block">
+            Show Innovation
+          </button>
+          <button @click="showPoint('architecture')" class="btn btn-sm btn-block">
+            Show Architecture
+          </button>
+          <button @click="showPoint('workflow')" class="btn btn-sm btn-block">
+            Demonstrate Workflow
+          </button>
+          <button @click="showPoint('blockchain')" class="btn btn-sm btn-block">
+            Explain Blockchain
+          </button>
+          <button @click="showPoint('limitations')" class="btn btn-sm btn-block">
+            Discuss Limitations
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+```
+
+**Start building!** Begin with **Prompt 1** in Replit, then work through the prompts in order. Message me when you have the basic setup running! 🚀
