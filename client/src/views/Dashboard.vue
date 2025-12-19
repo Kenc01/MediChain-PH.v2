@@ -1,13 +1,17 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from 'vue'
 import { useRouter, RouterLink, useRoute } from 'vue-router'
-import { Heart, LogOut, User, FileText, Shield, Settings, Menu, X, Wallet } from 'lucide-vue-next'
+import { Heart, LogOut, User, FileText, Shield, Settings, Menu, X, Wallet, BookOpen } from 'lucide-vue-next'
 import { usePatientStore } from '../stores/patientStore'
 import PatientProfile from '../components/patient/PatientProfile.vue'
 import EmergencyToggle from '../components/patient/EmergencyToggle.vue'
 import MedicalRecordsList from '../components/patient/MedicalRecordsList.vue'
 import BlockchainActivityFeed from '../components/BlockchainActivityFeed.vue'
 import HospitalRequestsList from '../components/HospitalRequestsList.vue'
+import ThesisNotes from '../components/ThesisNotes.vue'
+import SystemArchitectureDiagram from '../components/SystemArchitectureDiagram.vue'
+import DataFlowDiagram from '../components/DataFlowDiagram.vue'
+import ComparisonDiagram from '../components/ComparisonDiagram.vue'
 
 const router = useRouter()
 const route = useRoute()
@@ -19,6 +23,7 @@ const isLoading = ref(true)
 const menuOpen = ref(false)
 const activeTab = ref('profile')
 const nftWalletStatus = ref<any>(null)
+const thesisMode = ref(false)
 
 import { blockchain } from '@/utils/blockchainMock'
 
@@ -27,6 +32,7 @@ const tabs = [
   { id: 'records', label: 'Records', icon: FileText },
   { id: 'wallet', label: 'NFT Wallet', icon: Wallet },
   { id: 'emergency', label: 'Emergency', icon: Shield },
+  { id: 'thesis', label: 'Thesis', icon: BookOpen },
 ]
 
 const nftWallet = ref<any[]>([])
@@ -357,6 +363,69 @@ const patientProfileData = computed(() => {
 
         <div v-else-if="activeTab === 'emergency'">
           <EmergencyToggle />
+        </div>
+
+        <div v-else-if="activeTab === 'thesis'">
+          <div class="space-y-6">
+            <!-- Thesis Mode Toggle -->
+            <div class="flex items-center justify-between p-4 bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-lg">
+              <div>
+                <h3 class="font-semibold text-lg flex items-center gap-2">
+                  <BookOpen class="h-5 w-5" />
+                  Thesis Documentation & Architecture
+                </h3>
+                <p class="text-sm text-muted-foreground mt-1">Learn how MediChain-PH demonstrates blockchain-based patient data ownership</p>
+              </div>
+              <button
+                @click="thesisMode = !thesisMode"
+                :class="['px-4 py-2 rounded font-medium transition-colors', thesisMode ? 'bg-blue-600 text-white' : 'bg-blue-200 text-blue-900 dark:bg-blue-800 dark:text-blue-100']"
+              >
+                {{ thesisMode ? 'Mode: ON' : 'Mode: OFF' }}
+              </button>
+            </div>
+
+            <!-- Thesis Notes -->
+            <div class="bg-card border rounded-lg p-6">
+              <ThesisNotes />
+            </div>
+
+            <!-- System Architecture -->
+            <div class="bg-card border rounded-lg p-6">
+              <SystemArchitectureDiagram />
+            </div>
+
+            <!-- Data Flow Diagram -->
+            <div class="bg-card border rounded-lg p-6">
+              <DataFlowDiagram />
+            </div>
+
+            <!-- Comparison Diagram -->
+            <div class="bg-card border rounded-lg p-6">
+              <ComparisonDiagram />
+            </div>
+
+            <!-- Thesis Summary -->
+            <div class="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-950 dark:to-purple-950 border border-blue-200 dark:border-blue-800 rounded-lg p-6">
+              <h3 class="font-semibold text-lg mb-3">Thesis Summary</h3>
+              <div class="space-y-3 text-sm">
+                <p>
+                  <span class="font-semibold">Title:</span> MediChain-PH: Healthcare Records Management through NFT-based Patient Data Ownership
+                </p>
+                <p>
+                  <span class="font-semibold">Objective:</span> Demonstrate that blockchain technology can enable patients to maintain direct ownership and control of their medical records while supporting critical emergency use cases.
+                </p>
+                <p>
+                  <span class="font-semibold">Key Innovation:</span> Patient Profile NFTs with granular access controls, time-limited emergency access, and immutable audit trails.
+                </p>
+                <p>
+                  <span class="font-semibold">Target Audience:</span> Healthcare IT, Medical Informatics, and Blockchain Policy researchers interested in patient data sovereignty.
+                </p>
+                <p class="pt-2 font-semibold text-blue-600 dark:text-blue-400">
+                  All features on this platform have been designed and documented to support this thesis with practical evidence.
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </main>
