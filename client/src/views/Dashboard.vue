@@ -17,11 +17,16 @@ const isLoading = ref(true)
 const menuOpen = ref(false)
 const activeTab = ref('profile')
 
+import { blockchain } from '@/utils/blockchainMock'
+
 const tabs = [
   { id: 'profile', label: 'Profile', icon: User },
   { id: 'records', label: 'Records', icon: FileText },
+  { id: 'wallet', label: 'NFT Wallet', icon: Shield },
   { id: 'emergency', label: 'Emergency', icon: Shield },
 ]
+
+const nftWallet = ref<any[]>([])
 
 const mockPatientData = {
   id: "patient-001",
@@ -57,6 +62,7 @@ onMounted(async () => {
   if (storedUser) {
     user.value = JSON.parse(storedUser)
     await fetchPatientData()
+    loadNFTWallet()
   }
   isLoading.value = false
   patientStore.restoreEmergencyState()
@@ -65,6 +71,11 @@ onMounted(async () => {
     activeTab.value = route.query.tab
   }
 })
+
+function loadNFTWallet() {
+  const wallet = blockchain.getNFTWallet(user.value.nftId)
+  nftWallet.value = wallet
+}
 
 watch(activeTab, (newTab) => {
   router.replace({ query: { ...route.query, tab: newTab } })
@@ -265,6 +276,61 @@ const patientProfileData = computed(() => {
             :records="patientData?.recentRecords || patientData?.medicalRecords || []"
             :hospital-history="patientData?.hospitalHistory || []"
           />
+        </div>
+
+        <div v-else-if="activeTab === 'wallet'">
+          <div class="space-y-6">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div class="bg-card border rounded-lg p-6">
+                <p class="text-sm text-muted-foreground mb-1">Total NFTs Owned</p>
+                <p class="text-3xl font-bold">{{ nftWallet.length }}</p>
+              </div>
+              <div class="bg-card border rounded-lg p-6">
+                <p class="text-sm text-muted-foreground mb-1">Total Portfolio Value</p>
+                <p class="text-3xl font-bold text-green-600">${{ nftWallet.reduce((sum, nft) => sum + nft.value, 0) }}</p>
+              </div>
+              <div class="bg-card border rounded-lg p-6">
+                <p class="text-sm text-muted-foreground mb-1">Average NFT Value</p>
+                <p class="text-3xl font-bold">${{ nftWallet.length > 0 ? Math.round(nftWallet.reduce((sum, nft) => sum + nft.value, 0) / nftWallet.length) : 0 }}</p>
+              </div>
+            </div>
+
+            <div v-if="nftWallet.length > 0">
+              <h3 class="font-semibold text-lg mb-4">Your NFT Medical Records</h3>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div 
+                  v-for="nft in nftWallet" 
+                  :key="nft.nftId"
+                  class="bg-card border border-purple-200 dark:border-purple-800 rounded-lg p-4 hover:border-purple-500/50 transition-colors"
+                >
+                  <div class="flex items-start justify-between mb-3">
+                    <div>
+                      <p class="text-xs text-muted-foreground font-semibold uppercase">NFT ID</p>
+                      <p class="font-mono text-sm font-bold text-purple-600">{{ nft.tokenId }}</p>
+                    </div>
+                    <span class="inline-flex items-center gap-1 px-2 py-1 bg-green-500/10 text-green-600 rounded-full text-xs font-medium">
+                      ✓ Verified
+                    </span>
+                  </div>
+                  <div class="space-y-2 text-sm">
+                    <p><span class="text-muted-foreground">Record Type:</span> {{ nft.recordType }}</p>
+                    <p><span class="text-muted-foreground">Hospital:</span> {{ nft.hospital }}</p>
+                    <p><span class="text-muted-foreground">Minted:</span> {{ new Date(nft.mintedAt).toLocaleDateString('en-PH') }}</p>
+                    <p><span class="text-muted-foreground">Gas Fee:</span> {{ nft.gasUsed }}</p>
+                    <p class="text-green-600 font-medium">Value: ~${{ nft.value }}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div v-else class="text-center py-12 bg-card border rounded-lg">
+              <Shield class="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+              <h3 class="font-semibold mb-2">No NFT Medical Records Yet</h3>
+              <p class="text-muted-foreground text-sm">
+                Go to your Medical Records and mint your health data as NFTs for complete ownership and portability.
+              </p>
+            </div>
+          </div>
         </div>
 
         <div v-else-if="activeTab === 'emergency'">

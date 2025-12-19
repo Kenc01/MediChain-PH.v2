@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useRouter, RouterLink } from 'vue-router'
-import { Heart, FileText, LogOut, Calendar, Building2, ArrowLeft, Plus, Menu, X, Zap, ChevronDown } from 'lucide-vue-next'
+import { Heart, FileText, LogOut, Calendar, Building2, ArrowLeft, Plus, Menu, X, Zap, ChevronDown, CheckCircle, Link2 } from 'lucide-vue-next'
 import { blockchain } from '@/utils/blockchainMock'
 
 const router = useRouter()
@@ -11,12 +11,16 @@ const isLoading = ref(true)
 const menuOpen = ref(false)
 const expandedNFTIndex = ref<number | null>(null)
 const nftVerifications = ref<Map<string, any>>(new Map())
+const nftWallet = ref<any[]>([])
+const mintingRecord = ref<number | null>(null)
+const showMintModal = ref(false)
 
 onMounted(async () => {
   const storedUser = localStorage.getItem('user')
   if (storedUser) {
     user.value = JSON.parse(storedUser)
     await fetchPatientData()
+    loadNFTWallet()
   }
   isLoading.value = false
 })
@@ -40,6 +44,31 @@ async function fetchPatientData() {
   } catch (e) {
     console.error('Failed to fetch patient data')
   }
+}
+
+function loadNFTWallet() {
+  const wallet = blockchain.getNFTWallet(user.value.nftId)
+  nftWallet.value = wallet
+}
+
+function mintAsNFT(index: number, record: any) {
+  mintingRecord.value = index
+  showMintModal.value = true
+}
+
+function confirmMint(hospital: string = 'Philippine General Hospital') {
+  if (mintingRecord.value !== null) {
+    const record = patientData.value.medicalRecords[mintingRecord.value]
+    const nftMetadata = blockchain.mintNFT(user.value.nftId, record, hospital)
+    nftWallet.value.push(nftMetadata)
+    showMintModal.value = false
+    mintingRecord.value = null
+  }
+}
+
+function viewOnBlockchain(nftId: string) {
+  const url = `https://etherscan.io/address/${nftId}`
+  window.open(url, '_blank')
 }
 
 function toggleNFTDetails(index: number) {
@@ -183,12 +212,22 @@ function formatDate(date: string) {
                   <FileText class="h-5 w-5 text-primary" />
                 </div>
                 <div class="flex-1">
-                  <div class="flex items-center gap-2 flex-wrap">
+                  <div class="flex items-center gap-2 flex-wrap mb-1">
                     <h3 class="font-semibold">{{ record.diagnosis || record.type || 'Medical Record' }}</h3>
-                    <span class="inline-flex items-center gap-1 px-2 py-1 bg-blue-500/10 text-blue-600 rounded-full text-xs font-medium">
-                      <Zap class="h-3 w-3" />
-                      NFT-{{index + 1}}
+                  </div>
+                  <div class="flex flex-wrap gap-2">
+                    <span v-if="nftWallet.some((nft: any) => nft.recordType === record.diagnosis)" class="inline-flex items-center gap-1 px-2 py-1 bg-green-500/10 text-green-600 rounded-full text-xs font-medium">
+                      <CheckCircle class="h-3 w-3" />
+                      NFT Minted
                     </span>
+                    <button
+                      v-else
+                      @click="mintAsNFT(index, record)"
+                      class="inline-flex items-center gap-1 px-2 py-1 bg-purple-500/10 text-purple-600 rounded-full text-xs font-medium hover:bg-purple-500/20 transition-colors"
+                    >
+                      <Zap class="h-3 w-3" />
+                      Mint as NFT
+                    </button>
                   </div>
                   <div class="flex items-center gap-4 text-sm text-muted-foreground mt-1">
                     <span class="flex items-center gap-1">
@@ -221,53 +260,50 @@ function formatDate(date: string) {
               <p class="text-sm"><span class="font-medium">Treatment:</span> {{ record.treatment }}</p>
             </div>
 
-            <!-- NFT Verification Details -->
+            <!-- NFT Details -->
             <div v-if="expandedNFTIndex === index" class="mt-4 pt-4 border-t">
-              <div class="bg-blue-50 dark:bg-blue-950 rounded-md p-4 space-y-3">
-                <div>
-                  <p class="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Blockchain Verification</p>
-                  <div class="mt-2 space-y-2 text-sm">
-                    <div class="flex items-start justify-between">
-                      <span class="text-muted-foreground">Status:</span>
-                      <span class="font-medium text-green-600">✓ Verified</span>
-                    </div>
-                    <div class="flex items-start justify-between">
-                      <span class="text-muted-foreground">Block Hash:</span>
-                      <code class="text-xs bg-background px-2 py-1 rounded font-mono">
-                        {{ shortenHash(nftVerifications.get(index)?.blockHash || '0x0') }}
-                      </code>
-                    </div>
-                    <div class="flex items-start justify-between">
-                      <span class="text-muted-foreground">NFT ID:</span>
-                      <code class="text-xs bg-background px-2 py-1 rounded font-mono">
-                        NFT-{{ index + 1 }}-{{ user?.nftId || 'unknown' }}
-                      </code>
-                    </div>
-                    <div class="flex items-start justify-between">
-                      <span class="text-muted-foreground">Transactions:</span>
-                      <span class="font-medium">{{ nftVerifications.get(index)?.transactionCount || 0 }}</span>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- Transaction History -->
-                <div class="border-t pt-3">
-                  <p class="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">Transaction History</p>
-                  <div class="space-y-2 max-h-48 overflow-y-auto">
-                    <div 
-                      v-for="(tx, txIndex) in getTransactionHistory(index)" 
-                      :key="txIndex"
-                      class="flex items-start gap-2 text-xs"
-                    >
-                      <span class="text-blue-500 font-bold mt-0.5">→</span>
-                      <div class="flex-1">
-                        <p class="font-medium capitalize">{{ tx.action }}</p>
-                        <p class="text-muted-foreground text-xs">{{ tx.details }}</p>
-                        <p class="text-muted-foreground text-xs mt-1">{{ formatTimestamp(tx.timestamp) }}</p>
+              <div v-for="nft in nftWallet.filter((nft: any) => nft.recordType === record.diagnosis)" :key="nft.nftId" class="bg-purple-50 dark:bg-purple-950 rounded-md p-4 space-y-3">
+                <div class="flex items-start justify-between mb-3">
+                  <div>
+                    <p class="text-xs font-semibold text-purple-600 dark:text-purple-400 uppercase tracking-wide">NFT Metadata</p>
+                    <div class="mt-2 space-y-2 text-sm">
+                      <div class="flex items-center justify-between">
+                        <span class="text-muted-foreground">Token ID:</span>
+                        <code class="text-xs bg-background px-2 py-1 rounded font-mono font-bold text-purple-600">{{ nft.tokenId }}</code>
+                      </div>
+                      <div class="flex items-center justify-between">
+                        <span class="text-muted-foreground">Hospital:</span>
+                        <span class="font-medium">{{ nft.hospital }}</span>
+                      </div>
+                      <div class="flex items-center justify-between">
+                        <span class="text-muted-foreground">Minted:</span>
+                        <span class="font-medium">{{ formatDate(new Date(nft.mintedAt).toISOString()) }}</span>
+                      </div>
+                      <div class="flex items-center justify-between">
+                        <span class="text-muted-foreground">Gas Used:</span>
+                        <code class="text-xs bg-background px-2 py-1 rounded font-mono">{{ nft.gasUsed }}</code>
+                      </div>
+                      <div class="flex items-center justify-between">
+                        <span class="text-muted-foreground">Est. Value:</span>
+                        <span class="font-medium text-green-600">${{ nft.value }}</span>
+                      </div>
+                      <div class="flex items-center justify-between">
+                        <span class="text-muted-foreground">Status:</span>
+                        <span class="inline-flex items-center gap-1 px-2 py-1 bg-green-500/10 text-green-600 rounded-full text-xs font-medium">
+                          <CheckCircle class="h-3 w-3" />
+                          Verified
+                        </span>
                       </div>
                     </div>
                   </div>
                 </div>
+                <button
+                  @click="viewOnBlockchain(nft.blockHash)"
+                  class="w-full flex items-center justify-center gap-2 px-3 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-md text-sm font-medium transition-colors"
+                >
+                  <Link2 class="h-4 w-4" />
+                  View on Blockchain
+                </button>
               </div>
             </div>
           </div>
@@ -287,5 +323,49 @@ function formatDate(date: string) {
         </div>
       </div>
     </main>
+
+    <!-- NFT Minting Modal -->
+    <div v-if="showMintModal" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+      <div class="bg-white dark:bg-slate-900 rounded-lg max-w-md w-full p-6 space-y-4">
+        <div class="flex items-start justify-between">
+          <h3 class="font-bold text-lg">Mint Medical Record as NFT</h3>
+          <button @click="showMintModal = false" class="p-1 hover:bg-muted rounded">
+            <X class="h-5 w-5" />
+          </button>
+        </div>
+
+        <div class="bg-blue-50 dark:bg-blue-950 rounded-md p-4 space-y-2">
+          <p class="text-sm text-muted-foreground">
+            <strong>Record:</strong> {{ patientData?.medicalRecords[mintingRecord]?.diagnosis }}
+          </p>
+          <p class="text-sm text-muted-foreground">
+            <strong>Hospital:</strong> Philippine General Hospital
+          </p>
+          <p class="text-sm text-muted-foreground">
+            <strong>Gas Fee:</strong> ~0.0034 ETH ($5-10)
+          </p>
+        </div>
+
+        <p class="text-sm text-muted-foreground">
+          This will create a blockchain-verified NFT of your medical record, giving you complete ownership and portability of your health data.
+        </p>
+
+        <div class="flex gap-2 pt-2">
+          <button
+            @click="showMintModal = false"
+            class="flex-1 px-4 py-2 border rounded-md font-medium hover:bg-muted transition-colors"
+          >
+            Cancel
+          </button>
+          <button
+            @click="confirmMint()"
+            class="flex-1 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-md font-medium transition-colors flex items-center justify-center gap-2"
+          >
+            <Zap class="h-4 w-4" />
+            Mint NFT
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
