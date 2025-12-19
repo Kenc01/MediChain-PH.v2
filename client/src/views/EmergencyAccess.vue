@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue'
 import { useRouter, RouterLink } from 'vue-router'
-import { Heart, QrCode, AlertTriangle, Camera, X, Keyboard } from 'lucide-vue-next'
+import { Heart, QrCode, AlertTriangle, Camera, X, Keyboard, ArrowLeft } from 'lucide-vue-next'
 
 const router = useRouter()
 const scannerActive = ref(false)
@@ -58,6 +58,14 @@ onUnmounted(() => {
           <Heart class="h-6 w-6 text-primary" />
           <span class="font-bold text-lg">MediChain-PH</span>
         </RouterLink>
+        <button 
+          @click="router.back()"
+          class="p-2 hover:bg-muted rounded-md flex items-center gap-2 text-muted-foreground hover:text-foreground"
+          data-testid="button-back"
+        >
+          <ArrowLeft class="h-4 w-4" />
+          <span class="text-sm">Back</span>
+        </button>
       </div>
     </header>
 
