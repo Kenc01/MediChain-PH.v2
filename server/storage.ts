@@ -7,6 +7,8 @@ interface SimpleUser {
   fullName: string;
   bloodType: string | null;
   nftId: string;
+  walletAddress: string;
+  createdAt: Date;
 }
 
 interface HospitalUser {
@@ -24,6 +26,23 @@ interface AccessPermission {
   hospitalId: string;
   expiresAt: Date;
   status: string;
+}
+
+interface BlockchainActivity {
+  id: string;
+  userId: string;
+  action: string;
+  description: string;
+  timestamp: Date;
+  txHash?: string;
+}
+
+interface HospitalRequest {
+  id: string;
+  patientNftId: string;
+  hospitalName: string;
+  requestedAt: Date;
+  status: 'pending' | 'approved' | 'rejected';
 }
 
 interface PatientRecord {
@@ -62,6 +81,8 @@ class MemStorage {
   private patientRecords: Map<string, PatientRecord> = new Map();
   private emergencyLogs: EmergencyAccessLog[] = [];
   private accessPermissions: AccessPermission[] = [];
+  private blockchainActivity: BlockchainActivity[] = [];
+  private hospitalRequests: HospitalRequest[] = [];
 
   constructor() {
     this.seedDemoData();
@@ -77,8 +98,30 @@ class MemStorage {
       fullName: "Maria Santos",
       bloodType: "O+",
       nftId: demoNftId,
+      walletAddress: "0x742d35Cc6634C0532925a3b844Bc9e7595f12345",
+      createdAt: new Date(),
     };
     this.users.set(demoUser.id, demoUser);
+    
+    // Add blockchain activity for demo user
+    this.blockchainActivity.push(
+      {
+        id: randomUUID(),
+        userId: demoUser.id,
+        action: "mint",
+        description: "Patient Profile NFT minted successfully",
+        timestamp: new Date(),
+        txHash: "0x1a2b3c4d5e6f7g8h9i0j",
+      },
+      {
+        id: randomUUID(),
+        userId: demoUser.id,
+        action: "emergency_access",
+        description: "Emergency access granted to paramedic",
+        timestamp: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
+        txHash: "0x2b3c4d5e6f7g8h9i0j1k",
+      }
+    );
 
     const demoRecord: PatientRecord = {
       id: randomUUID(),
@@ -143,8 +186,19 @@ class MemStorage {
       fullName: "Juan Dela Cruz",
       bloodType: "A+",
       nftId: "NFT-DEMO-002",
+      walletAddress: "0x8A3b6Fa4C7d8e9f2a5c1B6e4D9F2A8C3d5E6F7a9",
+      createdAt: new Date(),
     };
     this.users.set(juan.id, juan);
+    
+    // Add hospital request for juan
+    this.hospitalRequests.push({
+      id: randomUUID(),
+      patientNftId: "NFT-DEMO-002",
+      hospitalName: "St. Luke's Medical Center",
+      requestedAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000),
+      status: 'pending',
+    });
 
     const juanRecord: PatientRecord = {
       id: randomUUID(),
@@ -189,9 +243,12 @@ class MemStorage {
     bloodType: string | null;
     nftId: string;
   }): Promise<SimpleUser> {
+    const walletAddress = this.generateWalletAddress();
     const user: SimpleUser = {
       id: randomUUID(),
       ...data,
+      walletAddress,
+      createdAt: new Date(),
     };
     this.users.set(user.id, user);
 
@@ -207,7 +264,45 @@ class MemStorage {
     };
     this.patientRecords.set(data.nftId, patientRecord);
 
+    // Log initial NFT minting to blockchain activity
+    this.blockchainActivity.push({
+      id: randomUUID(),
+      userId: user.id,
+      action: 'mint',
+      description: 'Patient Profile NFT minted successfully',
+      timestamp: new Date(),
+      txHash: `0x${Math.random().toString(16).slice(2)}`,
+    });
+
     return user;
+  }
+
+  private generateWalletAddress(): string {
+    const chars = '0123456789abcdef';
+    let address = '0x';
+    for (let i = 0; i < 40; i++) {
+      address += chars[Math.floor(Math.random() * 16)];
+    }
+    return address;
+  }
+
+  async getBlockchainActivity(userId: string): Promise<BlockchainActivity[]> {
+    return this.blockchainActivity
+      .filter(activity => activity.userId === userId)
+      .sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime())
+      .slice(0, 10);
+  }
+
+  async getHospitalRequests(patientNftId: string): Promise<HospitalRequest[]> {
+    return this.hospitalRequests.filter(req => req.patientNftId === patientNftId);
+  }
+
+  async updateHospitalRequestStatus(requestId: string, status: 'approved' | 'rejected'): Promise<HospitalRequest | null> {
+    const request = this.hospitalRequests.find(r => r.id === requestId);
+    if (request) {
+      request.status = status;
+    }
+    return request || null;
   }
 
   async getPatientRecordByNftId(nftId: string): Promise<PatientRecord | undefined> {

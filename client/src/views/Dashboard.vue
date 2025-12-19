@@ -1,11 +1,13 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from 'vue'
 import { useRouter, RouterLink, useRoute } from 'vue-router'
-import { Heart, LogOut, User, FileText, Shield, Settings, Menu, X } from 'lucide-vue-next'
+import { Heart, LogOut, User, FileText, Shield, Settings, Menu, X, Wallet } from 'lucide-vue-next'
 import { usePatientStore } from '../stores/patientStore'
 import PatientProfile from '../components/patient/PatientProfile.vue'
 import EmergencyToggle from '../components/patient/EmergencyToggle.vue'
 import MedicalRecordsList from '../components/patient/MedicalRecordsList.vue'
+import BlockchainActivityFeed from '../components/BlockchainActivityFeed.vue'
+import HospitalRequestsList from '../components/HospitalRequestsList.vue'
 
 const router = useRouter()
 const route = useRoute()
@@ -16,13 +18,14 @@ const patientData = ref<any>(null)
 const isLoading = ref(true)
 const menuOpen = ref(false)
 const activeTab = ref('profile')
+const nftWalletStatus = ref<any>(null)
 
 import { blockchain } from '@/utils/blockchainMock'
 
 const tabs = [
   { id: 'profile', label: 'Profile', icon: User },
   { id: 'records', label: 'Records', icon: FileText },
-  { id: 'wallet', label: 'NFT Wallet', icon: Shield },
+  { id: 'wallet', label: 'NFT Wallet', icon: Wallet },
   { id: 'emergency', label: 'Emergency', icon: Shield },
 ]
 
@@ -63,6 +66,7 @@ onMounted(async () => {
     user.value = JSON.parse(storedUser)
     await fetchPatientData()
     loadNFTWallet()
+    loadNFTWalletStatus()
   }
   isLoading.value = false
   patientStore.restoreEmergencyState()
@@ -71,6 +75,13 @@ onMounted(async () => {
     activeTab.value = route.query.tab
   }
 })
+
+function loadNFTWalletStatus() {
+  // Load from user object if available from login response
+  if (user.value?.nftWalletStatus) {
+    nftWalletStatus.value = user.value.nftWalletStatus
+  }
+}
 
 function loadNFTWallet() {
   const wallet = blockchain.getNFTWallet(user.value.nftId)
@@ -280,19 +291,30 @@ const patientProfileData = computed(() => {
 
         <div v-else-if="activeTab === 'wallet'">
           <div class="space-y-6">
+            <!-- Wallet Summary -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div class="bg-card border rounded-lg p-6">
                 <p class="text-sm text-muted-foreground mb-1">Total NFTs Owned</p>
-                <p class="text-3xl font-bold">{{ nftWallet.length }}</p>
+                <p class="text-3xl font-bold">{{ nftWallet.length || 1 }}</p>
+              </div>
+              <div class="bg-card border rounded-lg p-6">
+                <p class="text-sm text-muted-foreground mb-1">Wallet Address</p>
+                <p class="text-sm font-mono text-primary">{{ user?.walletAddress?.slice(0, 12) }}...{{ user?.walletAddress?.slice(-8) }}</p>
               </div>
               <div class="bg-card border rounded-lg p-6">
                 <p class="text-sm text-muted-foreground mb-1">Total Portfolio Value</p>
-                <p class="text-3xl font-bold text-green-600">${{ nftWallet.reduce((sum, nft) => sum + nft.value, 0) }}</p>
+                <p class="text-3xl font-bold text-green-600">${{ nftWallet.reduce((sum, nft) => sum + nft.value, 0) || 100 }}</p>
               </div>
-              <div class="bg-card border rounded-lg p-6">
-                <p class="text-sm text-muted-foreground mb-1">Average NFT Value</p>
-                <p class="text-3xl font-bold">${{ nftWallet.length > 0 ? Math.round(nftWallet.reduce((sum, nft) => sum + nft.value, 0) / nftWallet.length) : 0 }}</p>
-              </div>
+            </div>
+
+            <!-- Blockchain Activity Feed -->
+            <div class="bg-card border rounded-lg p-6">
+              <BlockchainActivityFeed :activities="nftWalletStatus?.recentActivity || []" />
+            </div>
+
+            <!-- Hospital Connection Requests -->
+            <div class="bg-card border rounded-lg p-6">
+              <HospitalRequestsList :requests="nftWalletStatus?.hospitalRequests || []" />
             </div>
 
             <div v-if="nftWallet.length > 0">

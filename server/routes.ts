@@ -46,8 +46,10 @@ export async function registerRoutes(
           fullName: user.fullName,
           bloodType: user.bloodType,
           nftId: user.nftId,
+          walletAddress: user.walletAddress,
+          createdAt: user.createdAt,
         },
-        message: "Registration successful",
+        message: "Registration successful - Patient Profile NFT minted",
       });
     } catch (error) {
       if (error instanceof z.ZodError) {
@@ -71,6 +73,9 @@ export async function registerRoutes(
         return res.status(401).json({ message: "Invalid username or password" });
       }
 
+      const blockchainActivity = await storage.getBlockchainActivity(user.id);
+      const hospitalRequests = await storage.getHospitalRequests(user.nftId);
+
       res.json({
         user: {
           id: user.id,
@@ -78,6 +83,14 @@ export async function registerRoutes(
           fullName: user.fullName,
           bloodType: user.bloodType,
           nftId: user.nftId,
+          walletAddress: user.walletAddress,
+          createdAt: user.createdAt,
+        },
+        nftWalletStatus: {
+          totalNFTs: 1,
+          walletAddress: user.walletAddress,
+          recentActivity: blockchainActivity,
+          hospitalRequests: hospitalRequests,
         },
       });
     } catch (error) {
