@@ -1,13 +1,16 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
-import { AlertTriangle, Shield, Clock, X } from 'lucide-vue-next'
+import { AlertTriangle, Shield, Clock, X, Phone, MapPin, Bell } from 'lucide-vue-next'
 import { usePatientStore } from '../../stores/patientStore'
+import { blockchain } from '@/utils/blockchainMock'
 
 const patientStore = usePatientStore()
 const showConfirmModal = ref(false)
 const showDeactivateModal = ref(false)
 const emergencyPassword = ref('')
 const countdown = ref({ hours: 0, minutes: 0, seconds: 0 })
+const locationSharing = ref(false)
+const notificationSent = ref(false)
 let countdownInterval: ReturnType<typeof setInterval> | null = null
 
 const isActive = computed(() => patientStore.isEmergencyMode)
@@ -43,6 +46,37 @@ function activateEmergency() {
 function deactivateEmergency() {
   patientStore.toggleEmergency()
   showDeactivateModal.value = false
+}
+
+function callEmergencyContact(phone: string) {
+  window.location.href = `tel:${phone}`
+}
+
+function shareLocation() {
+  locationSharing.value = true
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition((position) => {
+      const { latitude, longitude } = position.coords
+      blockchain.logEmergencyAccess('location-shared', {
+        type: 'location_share',
+        latitude,
+        longitude,
+        timestamp: Date.now()
+      })
+    })
+  }
+}
+
+function notifyEmergencyContacts() {
+  notificationSent.value = true
+  blockchain.logEmergencyAccess('emergency-notification', {
+    type: 'emergency_notification',
+    message: 'Emergency alert sent to all registered contacts',
+    timestamp: Date.now()
+  })
+  setTimeout(() => {
+    notificationSent.value = false
+  }, 3000)
 }
 
 onMounted(() => {
@@ -139,6 +173,35 @@ watch(() => patientStore.isEmergencyMode, () => {
           </button>
         </div>
       </div>
+    </div>
+
+    <!-- Emergency Actions -->
+    <div v-if="isActive" class="grid grid-cols-2 md:grid-cols-3 gap-3">
+      <button
+        @click="notifyEmergencyContacts"
+        :class="[
+          'px-4 py-3 rounded-lg font-medium text-sm flex items-center justify-center gap-2 transition-all',
+          notificationSent 
+            ? 'bg-green-600 text-white' 
+            : 'bg-blue-600 hover:bg-blue-700 text-white'
+        ]"
+      >
+        <Bell :class="notificationSent ? 'h-4 w-4 animate-bounce' : 'h-4 w-4'" />
+        {{ notificationSent ? 'Notified!' : 'Notify' }}
+      </button>
+      
+      <button
+        @click="shareLocation"
+        :class="[
+          'px-4 py-3 rounded-lg font-medium text-sm flex items-center justify-center gap-2 transition-all',
+          locationSharing 
+            ? 'bg-green-600 text-white' 
+            : 'bg-green-600 hover:bg-green-700 text-white'
+        ]"
+      >
+        <MapPin class="h-4 w-4" />
+        {{ locationSharing ? 'Sharing...' : 'Share Location' }}
+      </button>
     </div>
 
     <div class="bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800 rounded-lg p-4">

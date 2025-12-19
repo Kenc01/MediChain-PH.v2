@@ -207,6 +207,39 @@ export class MockBlockchain {
   getBlockByNftId(nftId: string): Block | undefined {
     return this.blocks.find((b) => b.nftId === nftId);
   }
+
+  logEmergencyAccess(patientId: string, accessLog: any): void {
+    const timestamp = Date.now();
+    const blockHash = this.generateHash(`${patientId}-emergency-${timestamp}`);
+    
+    const emergencyBlock: Block = {
+      id: `EMERGENCY-BLOCK-${this.blocks.length + 1}`,
+      nftId: `EMERGENCY-${patientId}`,
+      patientId,
+      recordData: accessLog,
+      blockHash,
+      timestamp,
+      previousHash: this.blocks.length > 0 ? this.blocks[this.blocks.length - 1].blockHash : "0x0000000000000000",
+    };
+
+    this.blocks.push(emergencyBlock);
+
+    if (!this.transactionHistories.has(`EMERGENCY-${patientId}`)) {
+      this.transactionHistories.set(`EMERGENCY-${patientId}`, []);
+    }
+
+    const history = this.transactionHistories.get(`EMERGENCY-${patientId}`)!;
+    history.push({
+      hash: blockHash,
+      timestamp,
+      action: "emergency_access",
+      details: `Emergency access granted for ${accessLog.duration || 24} hours to paramedic/healthcare provider`,
+    });
+  }
+
+  getEmergencyAccessLog(patientId: string): TransactionHistory[] {
+    return this.transactionHistories.get(`EMERGENCY-${patientId}`) || [];
+  }
 }
 
 export const blockchain = new MockBlockchain();

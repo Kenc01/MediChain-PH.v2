@@ -1,11 +1,14 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import QrcodeVue from 'qrcode.vue'
-import { User, Droplet, AlertTriangle, Pill, Phone, Heart, Copy, Check } from 'lucide-vue-next'
+import { User, Droplet, AlertTriangle, Pill, Phone, Heart, Copy, Check, QrCode, Shield, MapPin, Phone as PhoneIcon } from 'lucide-vue-next'
 import { usePatientStore } from '../../stores/patientStore'
+import EmergencyScenario from '../EmergencyScenario.vue'
 
 const patientStore = usePatientStore()
 const copied = ref(false)
+const showEmergencyScenario = ref(false)
+const qrMode = ref<'normal' | 'emergency'>('normal')
 
 const props = defineProps<{
   patient: {
@@ -22,12 +25,23 @@ const props = defineProps<{
   }
 }>()
 
-const qrValue = computed(() => {
+const normalQRValue = computed(() => {
   const baseUrl = window.location.origin
-  if (patientStore.isEmergencyMode) {
-    return `${baseUrl}/emergency/${props.patient.nftId}?code=${patientStore.emergencyCode}`
-  }
-  return `${baseUrl}/emergency/${props.patient.nftId}`
+  return JSON.stringify({
+    type: 'normal',
+    patientId: props.patient.nftId,
+    name: props.patient.fullName,
+    timestamp: Date.now()
+  })
+})
+
+const emergencyQRValue = computed(() => {
+  const baseUrl = window.location.origin
+  return `${baseUrl}/emergency/${props.patient.nftId}?emergency=true&code=${patientStore.emergencyCode}`
+})
+
+const qrValue = computed(() => {
+  return qrMode.value === 'emergency' ? emergencyQRValue.value : normalQRValue.value
 })
 
 const age = computed(() => {
@@ -72,6 +86,80 @@ function copyQrUrl() {
           <p class="text-xs font-mono text-muted-foreground" data-testid="patient-nft-id">
             NFT ID: {{ patient.nftId }}
           </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- QR Codes Section -->
+    <div class="bg-card border rounded-lg p-6 space-y-4">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="text-lg font-semibold flex items-center gap-2">
+          <QrCode class="h-5 w-5" />
+          My QR Codes
+        </h3>
+        <div class="flex gap-2">
+          <button
+            @click="qrMode = 'normal'"
+            :class="[
+              'px-3 py-1 rounded-md text-sm font-medium transition-colors',
+              qrMode === 'normal' 
+                ? 'bg-blue-600 text-white' 
+                : 'bg-muted hover:bg-muted/80'
+            ]"
+          >
+            <Shield class="h-4 w-4 inline mr-1" />
+            Normal
+          </button>
+          <button
+            @click="qrMode = 'emergency'"
+            :class="[
+              'px-3 py-1 rounded-md text-sm font-medium transition-colors',
+              qrMode === 'emergency' 
+                ? 'bg-red-600 text-white' 
+                : 'bg-muted hover:bg-muted/80'
+            ]"
+          >
+            <AlertTriangle class="h-4 w-4 inline mr-1" />
+            Emergency
+          </button>
+        </div>
+      </div>
+
+      <div class="grid md:grid-cols-2 gap-6">
+        <!-- Normal QR -->
+        <div v-if="qrMode === 'normal'" class="bg-slate-50 dark:bg-slate-800 rounded-lg p-6 border border-blue-200 dark:border-blue-800 space-y-4">
+          <div class="space-y-2">
+            <p class="font-semibold text-sm">Standard QR Code</p>
+            <p class="text-xs text-muted-foreground">Scans with basic profile information</p>
+          </div>
+          <div class="bg-white p-4 rounded flex justify-center">
+            <QrcodeVue :value="normalQRValue" :size="200" level="H" />
+          </div>
+          <button
+            @click="copyQrUrl"
+            class="w-full px-3 py-2 border rounded-md font-medium text-sm hover:bg-muted transition-colors flex items-center justify-center gap-2"
+          >
+            <Copy class="h-4 w-4" />
+            {{ copied ? 'Copied!' : 'Copy URL' }}
+          </button>
+        </div>
+
+        <!-- Emergency QR -->
+        <div v-if="qrMode === 'emergency'" class="bg-red-50 dark:bg-red-950 rounded-lg p-6 border-2 border-red-300 dark:border-red-700 space-y-4">
+          <div class="space-y-2">
+            <p class="font-semibold text-sm text-red-900 dark:text-red-100">🚨 Emergency QR Code</p>
+            <p class="text-xs text-red-800 dark:text-red-300">Full 24-hour medical access for paramedics/emergency responders</p>
+          </div>
+          <div class="bg-white p-4 rounded flex justify-center border-2 border-red-300">
+            <QrcodeVue :value="emergencyQRValue" :size="200" level="H" />
+          </div>
+          <button
+            @click="showEmergencyScenario = true"
+            class="w-full px-3 py-2 bg-red-600 hover:bg-red-700 text-white rounded-md font-medium text-sm flex items-center justify-center gap-2 transition-colors"
+          >
+            <AlertTriangle class="h-4 w-4" />
+            Simulate Emergency Scan
+          </button>
         </div>
       </div>
     </div>
@@ -209,5 +297,17 @@ function copyQrUrl() {
         </div>
       </div>
     </div>
+
+    <!-- Emergency Scenario Modal -->
+    <EmergencyScenario
+      v-if="showEmergencyScenario"
+      :patient-nft-id="patient.nftId"
+      :blood-type="patient.bloodType"
+      :allergies="patient.allergies"
+      :name="patient.fullName"
+      :emergency-contacts="patient.emergencyContacts"
+      @close="showEmergencyScenario = false"
+      @accessed="(code) => {}"
+    />
   </div>
 </template>
