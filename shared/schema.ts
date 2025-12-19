@@ -121,6 +121,8 @@ export const patientRecords = pgTable("patient_records", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   userId: varchar("user_id").references(() => users.id),
   nftId: text("nft_id").notNull().unique(),
+  blockHash: text("block_hash"),
+  mintedAt: timestamp("minted_at"),
   patientName: text("patient_name").notNull(),
   bloodType: text("blood_type").notNull(),
   allergies: text("allergies").array().notNull().default(sql`ARRAY[]::text[]`),
