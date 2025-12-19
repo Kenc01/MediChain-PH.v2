@@ -160,7 +160,7 @@ onUnmounted(() => {
 <template>
   <div v-if="isDemoMode" class="fixed top-4 right-4 z-40 max-w-sm">
     <!-- Demo Mode Toggle Banner -->
-    <div class="bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg shadow-lg p-4 mb-4">
+    <div class="bg-slate-800 dark:bg-slate-900 border border-purple-500/50 text-white rounded-lg shadow-lg p-4 mb-4">
       <div class="flex items-center justify-between mb-3">
         <div class="flex items-center gap-2">
           <Book class="h-5 w-5" />
@@ -205,7 +205,7 @@ onUnmounted(() => {
       </div>
 
       <!-- Scenario Content -->
-      <div v-else :class="[currentScenarioData?.color, 'rounded-lg p-4 space-y-4']">
+      <div class="bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg p-4 space-y-4">
         <div class="flex items-start justify-between">
           <div>
             <h3 class="font-bold text-lg">{{ currentScenarioData?.title }}</h3>
@@ -218,23 +218,23 @@ onUnmounted(() => {
 
         <!-- Steps -->
         <div class="space-y-2">
-          <div class="text-xs font-semibold opacity-60">WORKFLOW STEP {{ stepCounter + 1 }}/{{ maxSteps }}</div>
-          <div class="bg-black/10 rounded p-3 min-h-16 flex items-center">
-            <p class="text-sm font-medium">{{ currentScenarioData?.steps[stepCounter] }}</p>
+          <div class="text-xs font-semibold text-slate-600 dark:text-slate-400">WORKFLOW STEP {{ stepCounter + 1 }}/{{ maxSteps }}</div>
+          <div class="bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded p-3 min-h-16 flex items-center">
+            <p class="text-sm font-medium text-slate-900 dark:text-slate-100">{{ currentScenarioData?.steps[stepCounter] }}</p>
           </div>
         </div>
 
         <!-- Academic Commentary -->
-        <div v-if="currentCommentary" class="bg-black/5 rounded p-3 border-l-2 border-current">
-          <p class="text-xs font-semibold opacity-60 mb-1">💡 ACADEMIC INSIGHT</p>
-          <p class="text-sm">{{ currentCommentary }}</p>
+        <div v-if="currentCommentary" class="bg-slate-50 dark:bg-slate-700 border-l-4 border-purple-500 rounded p-3">
+          <p class="text-xs font-semibold text-purple-600 dark:text-purple-400 mb-1">💡 ACADEMIC INSIGHT</p>
+          <p class="text-sm text-slate-700 dark:text-slate-200">{{ currentCommentary }}</p>
         </div>
 
         <!-- Controls -->
         <div class="flex gap-2">
           <button
             @click="nextStep"
-            class="flex-1 px-3 py-2 bg-white/20 hover:bg-white/30 rounded text-sm font-medium flex items-center justify-center gap-2 transition-colors"
+            class="flex-1 px-3 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded text-sm font-medium flex items-center justify-center gap-2 transition-colors"
           >
             <ChevronRight class="h-4 w-4" />
             Next
@@ -242,8 +242,8 @@ onUnmounted(() => {
           <button
             @click="toggleAutoAdvance"
             :class="[
-              isAutoAdvance ? 'bg-white/30' : 'bg-white/20',
-              'px-3 py-2 hover:bg-white/30 rounded text-sm font-medium flex items-center gap-2 transition-colors',
+              isAutoAdvance ? 'bg-purple-700' : 'bg-purple-600 hover:bg-purple-700',
+              'px-3 py-2 text-white rounded text-sm font-medium flex items-center gap-2 transition-colors',
             ]"
           >
             <component :is="isAutoAdvance ? Pause : Play" class="h-4 w-4" />
@@ -251,10 +251,10 @@ onUnmounted(() => {
         </div>
 
         <!-- Progress -->
-        <div class="w-full bg-black/20 rounded-full h-2">
+        <div v-if="currentScenarioData" class="w-full bg-slate-200 dark:bg-slate-600 rounded-full h-2">
           <div
             :style="{ width: `${((stepCounter + 1) / (maxSteps + currentScenarioData.commentary.length)) * 100}%` }"
-            class="h-full bg-white rounded-full transition-all duration-300"
+            class="h-full bg-purple-600 rounded-full transition-all duration-300"
           ></div>
         </div>
       </div>
@@ -262,9 +262,9 @@ onUnmounted(() => {
 
     <!-- Architecture Insights Cards -->
     <div v-if="isDemoMode && !currentScenario" class="space-y-2">
-      <div class="bg-card border rounded-lg p-3 space-y-2">
-        <h4 class="font-semibold text-sm">🏗️ System Architecture</h4>
-        <div class="text-xs space-y-1 text-muted-foreground">
+      <div class="bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg p-3 space-y-2">
+        <h4 class="font-semibold text-sm text-slate-900 dark:text-slate-100">🏗️ System Architecture</h4>
+        <div class="text-xs space-y-1 text-slate-700 dark:text-slate-300">
           <p><strong>Frontend:</strong> Vue.js 3 with TypeScript</p>
           <p><strong>Backend:</strong> Express.js with in-memory storage</p>
           <p><strong>Data:</strong> NFT-based patient records</p>
@@ -272,13 +272,13 @@ onUnmounted(() => {
         </div>
       </div>
 
-      <div class="bg-card border rounded-lg p-3 space-y-2">
-        <h4 class="font-semibold text-sm">🔑 Key Innovations</h4>
+      <div class="bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg p-3 space-y-2">
+        <h4 class="font-semibold text-sm text-slate-900 dark:text-slate-100">🔑 Key Innovations</h4>
         <button
           @click="highlightFeature('ownership')"
           :class="[
-            highlightedFeature === 'ownership' ? 'bg-primary/20' : '',
-            'w-full text-left text-xs px-2 py-1 rounded hover:bg-muted transition-colors',
+            highlightedFeature === 'ownership' ? 'bg-purple-100 dark:bg-purple-900' : 'hover:bg-slate-200 dark:hover:bg-slate-700',
+            'w-full text-left text-xs px-2 py-1 rounded text-slate-900 dark:text-slate-100 transition-colors',
           ]"
         >
           ✓ Patient Data Ownership via NFT
@@ -286,8 +286,8 @@ onUnmounted(() => {
         <button
           @click="highlightFeature('emergency')"
           :class="[
-            highlightedFeature === 'emergency' ? 'bg-primary/20' : '',
-            'w-full text-left text-xs px-2 py-1 rounded hover:bg-muted transition-colors',
+            highlightedFeature === 'emergency' ? 'bg-purple-100 dark:bg-purple-900' : 'hover:bg-slate-200 dark:hover:bg-slate-700',
+            'w-full text-left text-xs px-2 py-1 rounded text-slate-900 dark:text-slate-100 transition-colors',
           ]"
         >
           ✓ QR-Based Emergency Access
@@ -295,8 +295,8 @@ onUnmounted(() => {
         <button
           @click="highlightFeature('audit')"
           :class="[
-            highlightedFeature === 'audit' ? 'bg-primary/20' : '',
-            'w-full text-left text-xs px-2 py-1 rounded hover:bg-muted transition-colors',
+            highlightedFeature === 'audit' ? 'bg-purple-100 dark:bg-purple-900' : 'hover:bg-slate-200 dark:hover:bg-slate-700',
+            'w-full text-left text-xs px-2 py-1 rounded text-slate-900 dark:text-slate-100 transition-colors',
           ]"
         >
           ✓ Immutable Audit Trail
@@ -304,24 +304,24 @@ onUnmounted(() => {
         <button
           @click="highlightFeature('control')"
           :class="[
-            highlightedFeature === 'control' ? 'bg-primary/20' : '',
-            'w-full text-left text-xs px-2 py-1 rounded hover:bg-muted transition-colors',
+            highlightedFeature === 'control' ? 'bg-purple-100 dark:bg-purple-900' : 'hover:bg-slate-200 dark:hover:bg-slate-700',
+            'w-full text-left text-xs px-2 py-1 rounded text-slate-900 dark:text-slate-100 transition-colors',
           ]"
         >
           ✓ Time-Limited Access Grants
         </button>
       </div>
 
-      <div class="bg-card border rounded-lg p-3 space-y-2">
-        <h4 class="font-semibold text-sm">📊 Thesis Comparison</h4>
-        <div class="text-xs space-y-1">
+      <div class="bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg p-3 space-y-2">
+        <h4 class="font-semibold text-sm text-slate-900 dark:text-slate-100">📊 Thesis Comparison</h4>
+        <div class="text-xs space-y-1 text-slate-700 dark:text-slate-300">
           <div class="flex justify-between">
-            <span class="text-muted-foreground">Traditional EHR:</span>
+            <span class="font-medium">Traditional EHR:</span>
             <span>Centralized, hospital-controlled</span>
           </div>
           <div class="flex justify-between">
-            <span class="text-muted-foreground">MediChain-PH:</span>
-            <span class="text-primary">Patient-controlled, portable</span>
+            <span class="font-medium">MediChain-PH:</span>
+            <span class="text-purple-600 dark:text-purple-400 font-semibold">Patient-controlled, portable</span>
           </div>
         </div>
       </div>
