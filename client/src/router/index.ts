@@ -39,15 +39,29 @@ const router = createRouter({
       path: '/emergency/:nftId',
       name: 'emergency-view',
       component: () => import('@/views/EmergencyView.vue')
+    },
+    {
+      path: '/hospital-login',
+      name: 'hospital-login',
+      component: () => import('@/views/HospitalLogin.vue')
+    },
+    {
+      path: '/hospital',
+      name: 'hospital',
+      component: () => import('@/views/HospitalPortal.vue'),
+      meta: { requiresHospitalAuth: true }
     }
   ]
 })
 
 router.beforeEach((to, _from, next) => {
   const isAuthenticated = localStorage.getItem('user')
+  const isHospitalAuth = localStorage.getItem('hospital')
   
   if (to.meta.requiresAuth && !isAuthenticated) {
     next('/login')
+  } else if (to.meta.requiresHospitalAuth && !isHospitalAuth) {
+    next('/')
   } else {
     next()
   }

@@ -144,6 +144,16 @@ export const emergencyAccessLogs = pgTable("emergency_access_logs", {
   ipAddress: text("ip_address"),
 });
 
+export const hospitalAccessPermissions = pgTable("hospital_access_permissions", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  patientNftId: text("patient_nft_id").notNull(),
+  hospitalId: varchar("hospital_id").notNull(),
+  grantedAt: timestamp("granted_at").notNull().defaultNow(),
+  expiresAt: timestamp("expires_at").notNull(),
+  status: text("status").notNull().default("active"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
 export type VerificationDocument = {
   documentType: string;
   documentNumber: string;

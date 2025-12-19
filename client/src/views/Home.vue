@@ -63,6 +63,12 @@ import { Shield, Heart, QrCode, ArrowRight } from 'lucide-vue-next'
               <QrCode class="h-4 w-4" />
               Emergency Access
             </RouterLink>
+            <RouterLink 
+              to="/hospital-login" 
+              class="inline-flex items-center justify-center gap-2 px-6 py-3 border border-blue-500 bg-blue-50 text-blue-600 dark:bg-blue-950 rounded-md font-medium hover-elevate"
+            >
+              Hospital Portal
+            </RouterLink>
           </div>
         </div>
       </section>

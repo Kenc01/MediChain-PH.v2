@@ -9,6 +9,23 @@ interface SimpleUser {
   nftId: string;
 }
 
+interface HospitalUser {
+  id: string;
+  username: string;
+  password: string;
+  hospitalName: string;
+  address: string;
+  contactNumber: string;
+}
+
+interface AccessPermission {
+  id: string;
+  patientNftId: string;
+  hospitalId: string;
+  expiresAt: Date;
+  status: string;
+}
+
 interface PatientRecord {
   id: string;
   nftId: string;
@@ -41,8 +58,10 @@ interface EmergencyAccessLog {
 
 class MemStorage {
   private users: Map<string, SimpleUser> = new Map();
+  private hospitalUsers: Map<string, HospitalUser> = new Map();
   private patientRecords: Map<string, PatientRecord> = new Map();
   private emergencyLogs: EmergencyAccessLog[] = [];
+  private accessPermissions: AccessPermission[] = [];
 
   constructor() {
     this.seedDemoData();
@@ -53,7 +72,7 @@ class MemStorage {
     
     const demoUser: SimpleUser = {
       id: randomUUID(),
-      username: "demo",
+      username: "maria",
       password: "demo123",
       fullName: "Maria Santos",
       bloodType: "O+",
@@ -104,6 +123,54 @@ class MemStorage {
       ],
     };
     this.patientRecords.set(demoRecord.nftId, demoRecord);
+
+    // Add demo hospital users
+    const demoHospital: HospitalUser = {
+      id: randomUUID(),
+      username: "hospital",
+      password: "hospital123",
+      hospitalName: "Philippine General Hospital",
+      address: "Taft Avenue, Manila",
+      contactNumber: "+63 2 554 8000",
+    };
+    this.hospitalUsers.set(demoHospital.id, demoHospital);
+
+    // Add demo user juan
+    const juan: SimpleUser = {
+      id: randomUUID(),
+      username: "juan",
+      password: "demo123",
+      fullName: "Juan Dela Cruz",
+      bloodType: "A+",
+      nftId: "NFT-DEMO-002",
+    };
+    this.users.set(juan.id, juan);
+
+    const juanRecord: PatientRecord = {
+      id: randomUUID(),
+      nftId: "NFT-DEMO-002",
+      patientName: "Juan Dela Cruz",
+      bloodType: "A+",
+      allergies: ["Sulfonamides"],
+      medications: ["Aspirin 81mg"],
+      emergencyContacts: [
+        {
+          name: "Maria Dela Cruz",
+          relationship: "Wife",
+          phone: "+63 917 456 7890",
+        },
+      ],
+      medicalRecords: [
+        {
+          date: "2024-12-01",
+          diagnosis: "Heart Checkup",
+          treatment: "Continue medication, regular exercise",
+          hospital: "St. Luke's Medical Center",
+          notes: "ECG normal",
+        },
+      ],
+    };
+    this.patientRecords.set(juanRecord.nftId, juanRecord);
   }
 
   async getUserByUsername(username: string): Promise<SimpleUser | undefined> {
@@ -167,6 +234,78 @@ class MemStorage {
     return this.emergencyLogs.find(
       (log) => log.patientRecordId === patientRecordId && log.expiresAt > now
     );
+  }
+
+  async getHospitalByUsername(username: string): Promise<HospitalUser | undefined> {
+    for (const hospital of this.hospitalUsers.values()) {
+      if (hospital.username === username) {
+        return hospital;
+      }
+    }
+    return undefined;
+  }
+
+  async searchPatients(query: string): Promise<PatientRecord[]> {
+    const lowerQuery = query.toLowerCase();
+    const results: PatientRecord[] = [];
+    
+    for (const record of this.patientRecords.values()) {
+      if (
+        record.patientName.toLowerCase().includes(lowerQuery) ||
+        record.nftId.toLowerCase().includes(lowerQuery)
+      ) {
+        results.push(record);
+      }
+    }
+    return results;
+  }
+
+  async grantAccessPermission(data: {
+    patientNftId: string;
+    hospitalId: string;
+    durationDays: number;
+  }): Promise<AccessPermission> {
+    const permission: AccessPermission = {
+      id: randomUUID(),
+      patientNftId: data.patientNftId,
+      hospitalId: data.hospitalId,
+      expiresAt: new Date(Date.now() + data.durationDays * 24 * 60 * 60 * 1000),
+      status: "active",
+    };
+    this.accessPermissions.push(permission);
+    return permission;
+  }
+
+  async checkAccessPermission(patientNftId: string, hospitalId: string): Promise<boolean> {
+    const now = new Date();
+    return this.accessPermissions.some(
+      (p) => p.patientNftId === patientNftId && 
+             p.hospitalId === hospitalId && 
+             p.expiresAt > now && 
+             p.status === "active"
+    );
+  }
+
+  async addRecordByHospital(data: {
+    patientNftId: string;
+    diagnosis: string;
+    treatment: string;
+    hospital: string;
+    notes?: string;
+  }): Promise<PatientRecord | null> {
+    const record = this.patientRecords.get(data.patientNftId);
+    if (!record) return null;
+
+    const newMedicalRecord = {
+      date: new Date().toISOString().split("T")[0],
+      diagnosis: data.diagnosis,
+      treatment: data.treatment,
+      hospital: data.hospital,
+      notes: data.notes,
+    };
+
+    record.medicalRecords.push(newMedicalRecord);
+    return record;
   }
 }
 
