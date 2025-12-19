@@ -158,9 +158,9 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div v-if="isDemoMode" class="fixed top-4 right-4 z-40 max-w-sm">
+  <div v-if="isDemoMode" class="fixed right-4 z-40 max-w-sm bottom-4">
     <!-- Demo Mode Toggle Banner -->
-    <div class="bg-slate-800 dark:bg-slate-900 border border-purple-500/50 text-white rounded-lg shadow-lg p-4 mb-4">
+    <div class="bg-slate-800 dark:bg-slate-900 border border-purple-500/50 text-white rounded-lg shadow-2xl p-4 mb-4">
       <div class="flex items-center justify-between mb-3">
         <div class="flex items-center gap-2">
           <Book class="h-5 w-5" />
@@ -261,7 +261,7 @@ onUnmounted(() => {
     </div>
 
     <!-- Architecture Insights Cards -->
-    <div v-if="isDemoMode && !currentScenario" class="space-y-2">
+    <div v-if="isDemoMode && !currentScenario" class="space-y-2 max-h-96 overflow-y-auto">
       <div class="bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg p-3 space-y-2">
         <h4 class="font-semibold text-sm text-slate-900 dark:text-slate-100">🏗️ System Architecture</h4>
         <div class="text-xs space-y-1 text-slate-700 dark:text-slate-300">
@@ -332,9 +332,9 @@ onUnmounted(() => {
   <button
     v-if="!isDemoMode"
     @click="toggleDemoMode"
-    class="fixed bottom-4 right-4 z-40 px-4 py-2 bg-purple-500 hover:bg-purple-600 text-white rounded-lg font-medium text-sm flex items-center gap-2 shadow-lg hover:shadow-xl transition-all"
+    class="fixed bottom-6 right-6 z-40 px-4 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-full font-medium text-sm flex items-center gap-2 shadow-xl hover:shadow-2xl transition-all hover:scale-110"
   >
-    <Book class="h-4 w-4" />
-    Thesis Demo
+    <Book class="h-5 w-5" />
+    Demo
   </button>
 </template>
