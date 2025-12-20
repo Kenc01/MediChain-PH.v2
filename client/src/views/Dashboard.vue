@@ -14,6 +14,10 @@ import SystemArchitectureDiagram from '../components/SystemArchitectureDiagram.v
 import DataFlowDiagram from '../components/DataFlowDiagram.vue'
 import ComparisonDiagram from '../components/ComparisonDiagram.vue'
 import ThesisOverlay from '../components/ThesisOverlay.vue'
+import BlockchainVisualizer from '../components/BlockchainVisualizer.vue'
+import ThesisDemoController from '../components/ThesisDemoController.vue'
+import EmergencyScenarioLauncher from '../components/EmergencyScenarioLauncher.vue'
+import HospitalAccessPanel from '../components/HospitalAccessPanel.vue'
 
 const router = useRouter()
 const route = useRoute()
@@ -30,6 +34,7 @@ const nftWalletStatus = ref<any>(null)
 import { blockchain } from '@/utils/blockchainMock'
 
 const tabs = [
+  { id: 'dashboard', label: 'Dashboard', icon: Wallet },
   { id: 'profile', label: 'Profile', icon: User },
   { id: 'records', label: 'Records', icon: FileText },
   { id: 'wallet', label: 'NFT Wallet', icon: Wallet },
@@ -267,7 +272,8 @@ const patientProfileData = computed(() => {
             Welcome, {{ user?.fullName || 'Patient' }}
           </h1>
           <p class="text-muted-foreground">
-            <template v-if="activeTab === 'profile'">View and manage your health profile</template>
+            <template v-if="activeTab === 'dashboard'">Thesis demonstration dashboard with all features</template>
+            <template v-else-if="activeTab === 'profile'">View and manage your health profile</template>
             <template v-else-if="activeTab === 'records'">Your complete medical history</template>
             <template v-else-if="activeTab === 'emergency'">Configure emergency access settings</template>
           </p>
@@ -286,7 +292,53 @@ const patientProfileData = computed(() => {
           </button>
         </div>
 
-        <div v-if="activeTab === 'profile' && patientProfileData">
+        <div v-if="activeTab === 'dashboard'">
+          <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Left Column: Patient Info -->
+            <div class="lg:col-span-1 space-y-6">
+              <div class="bg-card border rounded-lg p-6">
+                <h3 class="font-semibold text-lg mb-4">Patient Identity</h3>
+                <div class="space-y-2 text-sm">
+                  <p><span class="text-muted-foreground">Name:</span> {{ user?.fullName }}</p>
+                  <p><span class="text-muted-foreground">Blood Type:</span> {{ user?.bloodType || 'Unknown' }}</p>
+                  <p class="font-mono text-xs break-all"><span class="text-muted-foreground">Wallet:</span> {{ user?.walletAddress }}</p>
+                  <p><span class="text-muted-foreground">NFT ID:</span> {{ user?.nftId }}</p>
+                </div>
+              </div>
+
+              <EmergencyToggle />
+
+              <BlockchainVisualizer :user-id="user?.id" />
+            </div>
+
+            <!-- Middle Column: Medical Records -->
+            <div class="lg:col-span-1">
+              <div class="bg-card border rounded-lg p-6">
+                <h3 class="font-semibold text-lg mb-4">Medical Records (5)</h3>
+                <div class="space-y-3 max-h-96 overflow-y-auto">
+                  <div
+                    v-for="(record, idx) in (patientData?.recentRecords || []).slice(0, 5)"
+                    :key="idx"
+                    class="p-3 border rounded bg-muted/30 text-sm"
+                  >
+                    <p class="font-medium">{{ record.type }}</p>
+                    <p class="text-xs text-muted-foreground">{{ record.date }}</p>
+                    <p class="text-xs mt-1">{{ record.description }}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Right Column: Thesis Features -->
+            <div class="lg:col-span-1 space-y-6">
+              <ThesisDemoController />
+              <EmergencyScenarioLauncher />
+              <HospitalAccessPanel />
+            </div>
+          </div>
+        </div>
+
+        <div v-else-if="activeTab === 'profile' && patientProfileData">
           <PatientProfile :patient="patientProfileData" />
         </div>
 
