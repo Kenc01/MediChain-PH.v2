@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from 'vue'
 import { useRouter, RouterLink, useRoute } from 'vue-router'
-import { Heart, LogOut, User, FileText, Shield, Settings, Menu, X, Wallet, BookOpen } from 'lucide-vue-next'
+import { Heart, LogOut, User, FileText, Shield, Settings, Menu, X, Wallet, BookOpen, Lightbulb, Eye, EyeOff } from 'lucide-vue-next'
 import { usePatientStore } from '../stores/patientStore'
+import { useThesisStore } from '../stores/thesisStore'
 import PatientProfile from '../components/patient/PatientProfile.vue'
 import EmergencyToggle from '../components/patient/EmergencyToggle.vue'
 import MedicalRecordsList from '../components/patient/MedicalRecordsList.vue'
@@ -12,10 +13,12 @@ import ThesisNotes from '../components/ThesisNotes.vue'
 import SystemArchitectureDiagram from '../components/SystemArchitectureDiagram.vue'
 import DataFlowDiagram from '../components/DataFlowDiagram.vue'
 import ComparisonDiagram from '../components/ComparisonDiagram.vue'
+import ThesisOverlay from '../components/ThesisOverlay.vue'
 
 const router = useRouter()
 const route = useRoute()
 const patientStore = usePatientStore()
+const thesisStore = useThesisStore()
 
 const user = ref<any>(null)
 const patientData = ref<any>(null)
@@ -23,7 +26,6 @@ const isLoading = ref(true)
 const menuOpen = ref(false)
 const activeTab = ref('profile')
 const nftWalletStatus = ref<any>(null)
-const thesisMode = ref(false)
 
 import { blockchain } from '@/utils/blockchainMock'
 
@@ -376,12 +378,22 @@ const patientProfileData = computed(() => {
                 </h3>
                 <p class="text-sm text-muted-foreground mt-1">Learn how MediChain-PH demonstrates blockchain-based patient data ownership</p>
               </div>
-              <button
-                @click="thesisMode = !thesisMode"
-                :class="['px-4 py-2 rounded font-medium transition-colors', thesisMode ? 'bg-blue-600 text-white' : 'bg-blue-200 text-blue-900 dark:bg-blue-800 dark:text-blue-100']"
-              >
-                {{ thesisMode ? 'Mode: ON' : 'Mode: OFF' }}
-              </button>
+              <div class="flex items-center gap-2">
+                <button
+                  @click="thesisStore.toggleExplanations()"
+                  :class="['px-3 py-2 rounded text-sm font-medium transition-colors', thesisStore.showExplanations ? 'bg-green-600 text-white' : 'bg-gray-200 text-gray-900 dark:bg-gray-800 dark:text-gray-100']"
+                  :title="thesisStore.showExplanations ? 'Hide explanations' : 'Show explanations'"
+                >
+                  <Eye v-if="thesisStore.showExplanations" class="h-4 w-4" />
+                  <EyeOff v-else class="h-4 w-4" />
+                </button>
+                <button
+                  @click="thesisStore.toggleThesisMode()"
+                  :class="['px-4 py-2 rounded font-medium transition-colors', thesisStore.isThesisMode ? 'bg-blue-600 text-white' : 'bg-blue-200 text-blue-900 dark:bg-blue-800 dark:text-blue-100']"
+                >
+                  {{ thesisStore.isThesisMode ? 'Mode: ON' : 'Mode: OFF' }}
+                </button>
+              </div>
             </div>
 
             <!-- Thesis Notes -->
