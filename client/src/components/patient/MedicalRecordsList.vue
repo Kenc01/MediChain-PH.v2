@@ -3,9 +3,10 @@ import { ref, computed } from 'vue'
 import { 
   FileText, Calendar, Building2, ChevronDown, ChevronUp, 
   Stethoscope, Pill, TestTube, Syringe, Activity, Search,
-  Filter, CheckCircle, Clock
+  Filter, CheckCircle, Clock, Sparkles, Lock, AlertCircle, Zap
 } from 'lucide-vue-next'
 import type { MedicalRecord, HospitalVisit } from '../../../../shared/schema'
+import { blockchain } from '@/utils/blockchainMock'
 
 const props = defineProps<{
   records: MedicalRecord[]
@@ -15,6 +16,9 @@ const props = defineProps<{
 const searchQuery = ref('')
 const selectedType = ref<string>('all')
 const expandedRecords = ref<Set<number>>(new Set())
+const recordNFTs = ref<Map<string, any>>(new Map())
+const mintingStatus = ref<Map<string, 'idle' | 'minting' | 'minted' | 'error'>>(new Map())
+const patientId = ref('patient-001')
 
 const recordTypes = [
   { value: 'all', label: 'All Records' },
@@ -90,6 +94,44 @@ function toggleExpand(index: number) {
     expandedRecords.value.add(index)
   }
 }
+
+async function mintAsNFT(record: MedicalRecord, index: number) {
+  const recordKey = `${index}-${record.date}`
+  
+  try {
+    mintingStatus.value.set(recordKey, 'minting')
+    
+    // Mint NFT using blockchain simulator
+    const nftData = blockchain.mintNFT(
+      patientId.value,
+      {
+        type: record.type,
+        description: getDescription(record),
+        date: record.date,
+        provider: getProvider(record)
+      },
+      getProvider(record)
+    )
+    
+    // Store NFT data
+    recordNFTs.value.set(recordKey, nftData)
+    mintingStatus.value.set(recordKey, 'minted')
+    
+  } catch (error) {
+    console.error('Error minting NFT:', error)
+    mintingStatus.value.set(recordKey, 'error')
+  }
+}
+
+function getNFTStatus(record: MedicalRecord, index: number) {
+  const recordKey = `${index}-${record.date}`
+  return mintingStatus.value.get(recordKey) || 'idle'
+}
+
+function getNFTData(record: MedicalRecord, index: number) {
+  const recordKey = `${index}-${record.date}`
+  return recordNFTs.value.get(recordKey)
+}
 </script>
 
 <template>
@@ -158,13 +200,30 @@ function toggleExpand(index: number) {
                   </div>
                 </div>
                 
-                <div class="flex items-center gap-2">
+                <div class="flex items-center gap-2 flex-wrap justify-end">
                   <span 
                     class="px-2 py-0.5 text-xs font-medium rounded-full"
                     :class="getRecordColor(record.type)"
                   >
                     {{ record.type }}
                   </span>
+                  
+                  <!-- NFT Status Badge -->
+                  <div v-if="getNFTStatus(record, index) === 'minted'" class="flex items-center gap-1 px-2 py-0.5 bg-green-500/10 text-green-600 dark:text-green-400 rounded-full text-xs font-medium">
+                    <CheckCircle class="h-3 w-3" />
+                    <span>NFT: {{ getNFTData(record, index).nftId.substring(0, 8) }}...</span>
+                  </div>
+                  
+                  <div v-else-if="getNFTStatus(record, index) === 'minting'" class="flex items-center gap-1 px-2 py-0.5 bg-blue-500/10 text-blue-600 dark:text-blue-400 rounded-full text-xs font-medium">
+                    <Zap class="h-3 w-3 animate-spin" />
+                    <span>Minting...</span>
+                  </div>
+                  
+                  <div v-else-if="getNFTStatus(record, index) === 'error'" class="flex items-center gap-1 px-2 py-0.5 bg-red-500/10 text-red-600 dark:text-red-400 rounded-full text-xs font-medium">
+                    <AlertCircle class="h-3 w-3" />
+                    <span>Failed</span>
+                  </div>
+                  
                   <component 
                     :is="expandedRecords.has(index) ? ChevronUp : ChevronDown" 
                     class="h-4 w-4 text-muted-foreground"
@@ -179,12 +238,36 @@ function toggleExpand(index: number) {
           v-if="expandedRecords.has(index)"
           class="px-4 pb-4 pt-0 border-t bg-muted/30"
         >
-          <div class="pt-4 space-y-3">
-            <div class="flex items-center gap-2 text-sm">
-              <CheckCircle class="h-4 w-4 text-green-500" />
-              <span class="text-green-600 dark:text-green-400 font-medium">Verified on Blockchain</span>
+          <div class="pt-4 space-y-4">
+            <!-- NFT Section -->
+            <div v-if="getNFTStatus(record, index) === 'minted'" class="p-3 bg-green-500/10 border border-green-200 dark:border-green-800 rounded-lg">
+              <div class="flex items-start justify-between mb-2">
+                <div class="flex items-center gap-2">
+                  <CheckCircle class="h-4 w-4 text-green-600 dark:text-green-400" />
+                  <span class="text-sm font-semibold text-green-600 dark:text-green-400">NFT Minted on Blockchain</span>
+                </div>
+                <Lock class="h-4 w-4 text-green-600 dark:text-green-400" />
+              </div>
+              <div class="space-y-1 text-xs text-green-700 dark:text-green-300">
+                <p><span class="font-medium">NFT ID:</span> {{ getNFTData(record, index).nftId }}</p>
+                <p><span class="font-medium">Token ID:</span> {{ getNFTData(record, index).tokenId }}</p>
+                <p><span class="font-medium">Block Hash:</span> {{ getNFTData(record, index).blockHash.substring(0, 16) }}...</p>
+                <p><span class="font-medium">Gas Used:</span> {{ getNFTData(record, index).gasUsed }}</p>
+              </div>
             </div>
             
+            <div v-else-if="getNFTStatus(record, index) === 'idle'" class="flex gap-2 mb-2">
+              <button
+                @click="mintAsNFT(record, index)"
+                class="flex items-center gap-2 px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors"
+              >
+                <Sparkles class="h-4 w-4" />
+                Mint as NFT
+              </button>
+              <p class="text-xs text-muted-foreground py-2">Create an immutable blockchain record of this medical data</p>
+            </div>
+            
+            <!-- Record Details -->
             <div class="grid sm:grid-cols-2 gap-4 text-sm">
               <div>
                 <p class="text-muted-foreground mb-1">Record Type</p>
