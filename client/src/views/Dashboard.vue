@@ -19,6 +19,7 @@ import ThesisDemoController from '../components/ThesisDemoController.vue'
 import EmergencyScenarioLauncher from '../components/EmergencyScenarioLauncher.vue'
 import HospitalAccessPanel from '../components/HospitalAccessPanel.vue'
 import PresentationMode from '../components/PresentationMode.vue'
+import ThesisReportGenerator from '../components/ThesisReportGenerator.vue'
 
 const router = useRouter()
 const route = useRoute()
@@ -43,6 +44,7 @@ const tabs = [
   { id: 'emergency', label: 'Emergency', icon: Shield },
   { id: 'thesis', label: 'Thesis', icon: BookOpen },
   { id: 'presentation', label: 'Presentation', icon: Presentation },
+  { id: 'report', label: 'Report', icon: FileText },
 ]
 
 const nftWallet = ref<any[]>([])
@@ -280,6 +282,7 @@ const patientProfileData = computed(() => {
             <template v-else-if="activeTab === 'records'">Your complete medical history</template>
             <template v-else-if="activeTab === 'emergency'">Configure emergency access settings</template>
             <template v-else-if="activeTab === 'presentation'">9-slide thesis defense presentation</template>
+            <template v-else-if="activeTab === 'report'">Automated thesis documentation generator</template>
           </p>
         </div>
 
@@ -471,6 +474,10 @@ const patientProfileData = computed(() => {
               </div>
             </div>
           </div>
+        </div>
+
+        <div v-else-if="activeTab === 'report'">
+          <ThesisReportGenerator />
         </div>
 
         <div v-else-if="activeTab === 'thesis'">
