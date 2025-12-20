@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from 'vue'
 import { useRouter, RouterLink, useRoute } from 'vue-router'
-import { Heart, LogOut, User, FileText, Shield, Settings, Menu, X, Wallet, BookOpen, Lightbulb, Eye, EyeOff } from 'lucide-vue-next'
+import { Heart, LogOut, User, FileText, Shield, Settings, Menu, X, Wallet, BookOpen, Lightbulb, Eye, EyeOff, Presentation } from 'lucide-vue-next'
 import { usePatientStore } from '../stores/patientStore'
 import { useThesisStore } from '../stores/thesisStore'
 import PatientProfile from '../components/patient/PatientProfile.vue'
@@ -18,6 +18,7 @@ import BlockchainVisualizer from '../components/BlockchainVisualizer.vue'
 import ThesisDemoController from '../components/ThesisDemoController.vue'
 import EmergencyScenarioLauncher from '../components/EmergencyScenarioLauncher.vue'
 import HospitalAccessPanel from '../components/HospitalAccessPanel.vue'
+import PresentationMode from '../components/PresentationMode.vue'
 
 const router = useRouter()
 const route = useRoute()
@@ -30,6 +31,7 @@ const isLoading = ref(true)
 const menuOpen = ref(false)
 const activeTab = ref('profile')
 const nftWalletStatus = ref<any>(null)
+const showPresentation = ref(false)
 
 import { blockchain } from '@/utils/blockchainMock'
 
@@ -40,6 +42,7 @@ const tabs = [
   { id: 'wallet', label: 'NFT Wallet', icon: Wallet },
   { id: 'emergency', label: 'Emergency', icon: Shield },
   { id: 'thesis', label: 'Thesis', icon: BookOpen },
+  { id: 'presentation', label: 'Presentation', icon: Presentation },
 ]
 
 const nftWallet = ref<any[]>([])
@@ -276,6 +279,7 @@ const patientProfileData = computed(() => {
             <template v-else-if="activeTab === 'profile'">View and manage your health profile</template>
             <template v-else-if="activeTab === 'records'">Your complete medical history</template>
             <template v-else-if="activeTab === 'emergency'">Configure emergency access settings</template>
+            <template v-else-if="activeTab === 'presentation'">9-slide thesis defense presentation</template>
           </p>
         </div>
 
@@ -419,6 +423,56 @@ const patientProfileData = computed(() => {
           <EmergencyToggle />
         </div>
 
+        <div v-else-if="activeTab === 'presentation'">
+          <div class="space-y-6">
+            <div class="bg-card border rounded-lg p-8 text-center">
+              <Presentation class="h-16 w-16 text-primary mx-auto mb-4" />
+              <h2 class="text-2xl font-bold mb-2">Thesis Defense Presentation</h2>
+              <p class="text-muted-foreground mb-6">
+                A comprehensive 9-slide presentation covering problem statement, solution, architecture, demos, and benefits.
+              </p>
+              <button
+                @click="showPresentation = true"
+                class="px-8 py-3 bg-primary text-primary-foreground rounded-lg font-semibold flex items-center justify-center gap-2 mx-auto hover:opacity-90 transition-opacity"
+              >
+                <Presentation class="h-5 w-5" />
+                Start Presentation
+              </button>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div class="bg-card border rounded-lg p-4">
+                <h3 class="font-semibold mb-3">Presentation Slides:</h3>
+                <ol class="space-y-2 text-sm">
+                  <li>1. The Problem - Healthcare Control Issues</li>
+                  <li>2. Proposed Solution - NFT-Based Ownership</li>
+                  <li>3. System Architecture - Technical Design</li>
+                  <li>4. Data Flow & Integration - Component Interaction</li>
+                  <li>5. Traditional vs MediChain - Comparison</li>
+                  <li>6. Patient Portal Demo - Live Feature Test</li>
+                  <li>7. Emergency System Demo - Paramedic Workflow</li>
+                  <li>8. Blockchain Verification - Audit Trail</li>
+                  <li>9. Benefits & Impact - Philippines Healthcare</li>
+                </ol>
+              </div>
+
+              <div class="bg-card border rounded-lg p-4">
+                <h3 class="font-semibold mb-3">Features:</h3>
+                <ul class="space-y-2 text-sm">
+                  <li>✓ Full-screen presentation mode</li>
+                  <li>✓ Navigation with keyboard/buttons</li>
+                  <li>✓ Progress bar and slide counter</li>
+                  <li>✓ Quick jump to any slide</li>
+                  <li>✓ Live component demos embedded</li>
+                  <li>✓ Interactive features during presentation</li>
+                  <li>✓ Professional slide design</li>
+                  <li>✓ Presentation notes on each slide</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <div v-else-if="activeTab === 'thesis'">
           <div class="space-y-6">
             <!-- Thesis Mode Toggle -->
@@ -493,5 +547,9 @@ const patientProfileData = computed(() => {
         </div>
       </div>
     </main>
+
+    <PresentationMode :is-active="showPresentation" @close="showPresentation = false" />
+
+    <ThesisOverlay v-if="thesisStore.isThesisMode && activeTab !== 'presentation'" />
   </div>
 </template>
