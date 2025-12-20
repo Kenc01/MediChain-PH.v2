@@ -2,8 +2,10 @@
 import { ref } from 'vue'
 import { useRouter, RouterLink } from 'vue-router'
 import { Heart, LogOut } from 'lucide-vue-next'
+import { useHospitalStore } from '../stores/hospitalStore'
 
 const router = useRouter()
+const hospitalStore = useHospitalStore()
 const username = ref('')
 const password = ref('')
 const isLoading = ref(false)
@@ -22,7 +24,7 @@ async function handleLogin() {
 
     if (response.ok) {
       const data = await response.json()
-      localStorage.setItem('hospital', JSON.stringify(data.hospital))
+      hospitalStore.setHospital(data.hospital)
       router.push('/hospital')
     } else {
       error.value = 'Invalid credentials'

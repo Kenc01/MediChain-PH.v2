@@ -1,10 +1,11 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { useRouter, RouterLink } from 'vue-router'
 import { Heart, LogOut, Search, Lock, Plus, Menu, X, Calendar, Pill } from 'lucide-vue-next'
+import { useHospitalStore } from '../stores/hospitalStore'
 
 const router = useRouter()
-const hospital = ref<any>(null)
+const hospitalStore = useHospitalStore()
 const isLoading = ref(true)
 const menuOpen = ref(false)
 const activeTab = ref<'search' | 'addRecord'>('search')
@@ -20,11 +21,11 @@ const addRecordForm = ref({
   notes: '',
 })
 
+const hospital = computed(() => hospitalStore.currentHospital)
+
 onMounted(async () => {
-  const storedHospital = localStorage.getItem('hospital')
-  if (storedHospital) {
-    hospital.value = JSON.parse(storedHospital)
-  } else {
+  hospitalStore.restoreHospitalSession()
+  if (!hospital.value) {
     router.push('/')
   }
   isLoading.value = false
@@ -102,7 +103,7 @@ async function submitAddRecord() {
 }
 
 function logout() {
-  localStorage.removeItem('hospital')
+  hospitalStore.clearHospital()
   router.push('/')
 }
 </script>
