@@ -3,13 +3,22 @@ import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { AlertTriangle, Droplet, AlertCircle, Clock, MapPin, Phone, X, CheckCircle2 } from 'lucide-vue-next'
 import { blockchain } from '@/utils/blockchainMock'
 
-const props = defineProps<{
-  patientNftId: string
-  bloodType: string
-  allergies: string[]
-  name: string
-  emergencyContacts: { name: string; phone: string; relationship: string }[]
-}>()
+const props = withDefaults(defineProps<{
+  patientNftId?: string
+  bloodType?: string
+  allergies?: string[]
+  name?: string
+  emergencyContacts?: { name: string; phone: string; relationship: string }[]
+}>(), {
+  patientNftId: 'DEMO-001',
+  bloodType: 'O+',
+  allergies: () => ['Penicillin'],
+  name: 'Demo Patient',
+  emergencyContacts: () => [
+    { name: 'Maria Santos', phone: '+63 917 123 4567', relationship: 'Spouse' },
+    { name: 'Pedro Santos', phone: '+63 918 234 5678', relationship: 'Son' }
+  ]
+})
 
 const emit = defineEmits<{
   close: []
@@ -35,9 +44,11 @@ function startEmergencyAccess() {
     patientId: props.patientNftId,
     timestamp: Date.now(),
     duration: 24,
-    accessedData: 'critical_health_info'
+    accessedData: 'critical_health_info',
+    paramedic: 'Demo Paramedic Unit',
+    reason: 'Emergency Medical Response'
   }
-  blockchain.logEmergencyAccess(props.patientNftId, accessLog)
+  blockchain.logEmergencyAccess(props.patientNftId || 'unknown', accessLog)
   
   // Generate access code
   accessCode.value = `EMG-${Math.random().toString(36).substr(2, 9).toUpperCase()}`
@@ -150,12 +161,19 @@ onUnmounted(() => {
               <code class="text-lg font-mono font-bold tracking-widest">{{ accessCode }}</code>
             </div>
 
-            <!-- Timer -->
-            <div class="bg-blue-50 dark:bg-blue-950 border-2 border-blue-200 dark:border-blue-800 rounded p-4 flex items-center gap-3">
-              <Clock class="h-5 w-5 text-blue-600" />
-              <div>
-                <p class="text-xs font-semibold text-blue-900 dark:text-blue-100">Access Expires In</p>
-                <p class="text-2xl font-bold text-blue-600">{{ timeRemaining }} hours</p>
+              <!-- Timer -->
+            <div class="bg-blue-50 dark:bg-blue-950 border-2 border-blue-200 dark:border-blue-800 rounded p-4">
+              <div class="flex items-center gap-3 mb-2">
+                <Clock class="h-5 w-5 text-blue-600" />
+                <div>
+                  <p class="text-xs font-semibold text-blue-900 dark:text-blue-100">Access Expires In</p>
+                  <p class="text-2xl font-bold text-blue-600">{{ timeRemaining }} hours</p>
+                </div>
+              </div>
+              <div class="mt-3 pt-3 border-t border-blue-200 dark:border-blue-800">
+                <p class="text-xs text-blue-700 dark:text-blue-300">✓ All access automatically logged to blockchain</p>
+                <p class="text-xs text-blue-700 dark:text-blue-300">✓ Audit trail cannot be modified</p>
+                <p class="text-xs text-blue-700 dark:text-blue-300">✓ Patient maintains data ownership</p>
               </div>
             </div>
 

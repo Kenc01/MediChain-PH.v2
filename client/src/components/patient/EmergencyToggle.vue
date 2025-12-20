@@ -1,12 +1,13 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
-import { AlertTriangle, Shield, Clock, X, Phone, MapPin, Bell } from 'lucide-vue-next'
+import { AlertTriangle, Shield, Clock, X, Phone, MapPin, Bell, QrCode, Eye } from 'lucide-vue-next'
 import { usePatientStore } from '../../stores/patientStore'
 import { blockchain } from '@/utils/blockchainMock'
 
 const patientStore = usePatientStore()
 const showConfirmModal = ref(false)
 const showDeactivateModal = ref(false)
+const showQRCodes = ref(false)
 const emergencyPassword = ref('')
 const countdown = ref({ hours: 0, minutes: 0, seconds: 0 })
 const locationSharing = ref(false)
@@ -39,8 +40,16 @@ function updateCountdown() {
 
 function activateEmergency() {
   patientStore.toggleEmergency(emergencyPassword.value || undefined)
+  // Log to blockchain
+  blockchain.logEmergencyAccess(patientStore.currentPatient?.id || 'unknown', {
+    type: 'emergency_mode_activated',
+    accessCode: patientStore.emergencyCode,
+    duration: 24,
+    timestamp: Date.now()
+  })
   showConfirmModal.value = false
   emergencyPassword.value = ''
+  notifyEmergencyContactsMock()
 }
 
 function deactivateEmergency() {
@@ -69,14 +78,22 @@ function shareLocation() {
 
 function notifyEmergencyContacts() {
   notificationSent.value = true
-  blockchain.logEmergencyAccess('emergency-notification', {
+  blockchain.logEmergencyAccess(patientStore.currentPatient?.id || 'unknown', {
     type: 'emergency_notification',
     message: 'Emergency alert sent to all registered contacts',
-    timestamp: Date.now()
+    timestamp: Date.now(),
+    contactsNotified: 3
   })
   setTimeout(() => {
     notificationSent.value = false
   }, 3000)
+}
+
+function notifyEmergencyContactsMock() {
+  // Auto-notify contacts when emergency mode is activated
+  setTimeout(() => {
+    notifyEmergencyContacts()
+  }, 500)
 }
 
 onMounted(() => {
@@ -146,9 +163,35 @@ watch(() => patientStore.isEmergencyMode, () => {
             </span>
           </div>
           
-          <div v-if="isActive && patientStore.emergencyCode" class="p-3 bg-muted rounded-md mb-4">
-            <p class="text-xs text-muted-foreground mb-1">Emergency Access Code:</p>
-            <p class="font-mono font-bold text-lg" data-testid="emergency-code">{{ patientStore.emergencyCode }}</p>
+          <div v-if="isActive && patientStore.emergencyCode" class="space-y-3 mb-4">
+            <div class="p-3 bg-muted rounded-md">
+              <p class="text-xs text-muted-foreground mb-1">Emergency Access Code:</p>
+              <p class="font-mono font-bold text-lg" data-testid="emergency-code">{{ patientStore.emergencyCode }}</p>
+            </div>
+            
+            <button
+              @click="showQRCodes = !showQRCodes"
+              class="w-full px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded text-sm font-medium flex items-center justify-center gap-2 transition-colors"
+            >
+              <QrCode class="h-4 w-4" />
+              {{ showQRCodes ? 'Hide QR Codes' : 'Show QR Codes' }}
+            </button>
+            
+            <div v-if="showQRCodes" class="grid grid-cols-2 gap-3">
+              <div class="p-3 bg-white dark:bg-slate-800 border border-blue-200 dark:border-blue-800 rounded">
+                <p class="text-xs font-semibold text-muted-foreground mb-2">Normal QR Code</p>
+                <div class="w-full h-24 bg-gradient-to-br from-blue-100 to-blue-50 dark:from-blue-900 dark:to-blue-800 rounded flex items-center justify-center border border-blue-300 dark:border-blue-700">
+                  <span class="text-xs text-muted-foreground">█ QR █</span>
+                </div>
+              </div>
+              
+              <div class="p-3 bg-red-50 dark:bg-red-900 border border-red-300 dark:border-red-700 rounded">
+                <p class="text-xs font-semibold text-red-700 dark:text-red-300 mb-2">Emergency QR Code</p>
+                <div class="w-full h-24 bg-gradient-to-br from-red-100 to-red-50 dark:from-red-800 dark:to-red-900 rounded flex items-center justify-center border border-red-400 dark:border-red-600 animate-pulse">
+                  <span class="text-xs text-red-600 dark:text-red-400 font-bold">🚨 QR 🚨</span>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
         
